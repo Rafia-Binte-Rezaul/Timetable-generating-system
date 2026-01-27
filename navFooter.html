@@ -1,0 +1,93 @@
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark segi-nav fixed-top">
+  <div class="container">
+
+    <!-- LOGO -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <img src="logo.png" width="40" height="40" class="rounded" alt="SEGi Logo">
+      <span class="fw-bold">SEGi Timetable</span>
+    </a>
+
+    <!-- MOBILE TOGGLER -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- NAV LINKS -->
+    <div id="mainnav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="teachers.html">Teachers</a></li>
+        <li class="nav-item"><a class="nav-link" href="manage_subjects.html">Manage Courses</a></li>
+        <li class="nav-item"><a class="nav-link" href="subjects.html">Course Selection</a></li>
+        <li class="nav-item"><a class="nav-link" href="view_timetables.html">View Timetables</a></li>
+
+      </ul>
+
+      <!-- SEARCH -->
+      <form class="segi-search d-none d-lg-flex me-2" role="search" onsubmit="return false;">
+        <i class="bi bi-search"></i>
+        <input class="form-control form-control-sm segi-search-input"
+          type="search" placeholder="Search… (Ctrl+/)">
+      </form>
+
+    </div>
+  </div>
+</nav>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer-segi mt-5 pt-5">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- BRAND -->
+      <div class="col-md-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <img src="logo.png" width="40" height="40" class="rounded" alt="SEGi Logo">
+          <span class="brand h6 mb-0">SEGi Timetable</span>
+        </div>
+        <p class="small text-muted mb-0">
+          Timetable Management System prototype for SEGi College Kuala Lumpur.
+        </p>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div class="col-md-4 col-lg-3">
+        <h6 class="mb-2">Quick Links</h6>
+        <ul class="list-unstyled small mb-0">
+          <li><a class="footer-link" href="view_timetables.html">Timetable</a></li>
+          <li><a class="footer-link" href="subjects.html">Generator</a></li>
+          <li><a class="footer-link" href="schedule.html">Reports</a></li>
+          <li><a class="footer-link" href="index.html">Documentation</a></li>
+        </ul>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="col-md-3">
+        <h6 class="mb-2">Contact</h6>
+        <ul class="list-unstyled small mb-3">
+          <li><i class="bi bi-geo-alt me-2"></i>SEGi College Kuala Lumpur</li>
+          <li><i class="bi bi-envelope me-2"></i>it-projects@segi.edu.my</li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-2 social-links">
+          <a aria-label="Facebook" href="#"><i class="bi bi-facebook"></i></a>
+          <a aria-label="Instagram" href="#"><i class="bi bi-instagram"></i></a>
+          <a aria-label="LinkedIn" href="#"><i class="bi bi-linkedin"></i></a>
+          <a aria-label="YouTube" href="#"><i class="bi bi-youtube"></i></a>
+          <a aria-label="X" href="#"><i class="bi bi-twitter-x"></i></a>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="my-3">
+
+    <div class="d-flex justify-content-between small">
+      <span>© 2025 SEGi College Kuala Lumpur</span>
+      <a class="back-to-top" href="#top">Back to top</a>
+    </div>
+
+  </div>
+</footer>

@@ -1,0 +1,108 @@
+/* ============================
+   BRAND COLORS & BASICS
+============================ */
+:root {
+  --nav1:#0b2239;
+  --nav2:#154465;
+  --nav3:#167898;
+  --accent-line:#20e3b2;
+  --border:#e6ecf3;
+}
+
+/* ============================
+   NAVBAR
+============================ */
+.segi-nav {
+  background: linear-gradient(90deg, var(--nav1), var(--nav2), var(--nav3));
+  box-shadow: 0 6px 16px rgba(0,0,0,.15);
+}
+
+.segi-nav .nav-link {
+  color:#e6f0f9 !important;
+  position:relative;
+  font-weight:600;
+  padding:.6rem .9rem;
+}
+
+.segi-nav .nav-link.active,
+.segi-nav .nav-link:hover {
+  color:#fff !important;
+  background:rgba(255,255,255,.08);
+}
+
+.segi-nav .nav-link:hover::after,
+.segi-nav .nav-link.active::after {
+  content:"";
+  position:absolute;
+  left:.7rem;
+  right:.7rem;
+  bottom:-6px;
+  height:2px;
+  background:var(--accent-line);
+}
+
+/* ============================
+   SEARCH BAR
+============================ */
+.segi-search {
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  background:#ffffff;
+  border:1px solid #d7e2ea;
+  border-radius:999px;
+  padding:0.25rem 0.75rem;
+  height:40px;
+  box-shadow:0 4px 10px rgba(12,25,60,0.1);
+}
+
+.segi-search i {
+  background:#fff;
+  border:1px solid #d7e2ea;
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  opacity:.7;
+}
+
+.segi-search-input {
+  border:none;
+  outline:none;
+  background:transparent;
+  width:180px;
+  font-size:.9rem;
+}
+
+.segi-search-input::placeholder {
+  color:#6c7a8b;
+}
+
+/* ============================
+   FOOTER
+============================ */
+.footer-segi {
+  background:linear-gradient(#fafcfe,#f6f9fc);
+  border-top:1px solid var(--border);
+}
+
+.footer-link {
+  color:#0f172a;
+  text-decoration:none;
+}
+
+.footer-link:hover {
+  color:#0b5ed7;
+}
+
+.social-links a {
+  --size:30px;
+  width:var(--size);
+  height:var(--size);
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#fff;
+  border:1px solid #e6ecf3;
+}

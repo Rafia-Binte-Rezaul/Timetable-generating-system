@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Automatic Timetable System</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Main page styles -->
+<link rel="stylesheet" href="styles.css">
+
+<!-- Navbar + footer shared CSS -->
+<link rel="stylesheet" href="navFooter.css">
+
+<!-- Enhanced Calendar Styles -->
+<style>
+  .calendar-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9rem;
+  }
+  .calendar-header th {
+    background-color: #f8f9fa;
+    padding: 12px 8px;
+    font-weight: 600;
+    border: 1px solid #dee2e6;
+    text-align: center;
+  }
+  .time-column {
+    width: 140px;
+    background-color: #e9ecef !important;
+  }
+  .day-column {
+    width: calc((100% - 140px) / 5);
+  }
+  .time-cell {
+    background-color: #f8f9fa;
+    padding: 8px;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    vertical-align: middle;
+  }
+  .schedule-cell {
+    border: 1px solid #dee2e6;
+    padding: 0;
+    vertical-align: top;
+    position: relative;
+    height: 60px;
+    transition: all 0.2s ease;
+  }
+  .schedule-cell.empty {
+    background-color: #ffffff;
+  }
+  .schedule-cell.empty:hover {
+    background-color: #f8f9fa !important;
+  }
+  .schedule-cell.occupied {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .empty-slot {
+    padding: 8px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.8rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .event-content {
+    padding: 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .subject-code {
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+  }
+  .subject-name {
+    font-size: 0.8rem;
+    margin-bottom: 3px;
+    opacity: 0.9;
+  }
+  .teacher-name, .time-duration, .delivery-mode {
+    font-size: 0.7rem;
+    margin-bottom: 1px;
+    opacity: 0.8;
+  }
+  .unassigned-courses {
+    margin-top: 20px;
+  }
+  .schedule-stats {
+    margin-top: 20px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .stat-card.success {
+    border-left: 4px solid #28a745;
+  }
+  .stat-card.warning {
+    border-left: 4px solid #ffc107;
+  }
+  .stat-card.info {
+    border-left: 4px solid #17a2b8;
+  }
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+  .calendar-row:hover .time-cell {
+    background-color: #e9ecef;
+  }
+  .calendar-row:hover .schedule-cell.empty {
+    background-color: #f8f9fa;
+  }
+  @media (max-width: 768px) {
+    .calendar-table {
+      font-size: 0.8rem;
+    }
+    .event-content {
+      padding: 4px;
+    }
+    .subject-code {
+      font-size: 0.8rem;
+    }
+    .subject-name, .teacher-name, .time-duration, .delivery-mode {
+      font-size: 0.7rem;
+    }
+    .time-column {
+      width: 100px;
+    }
+  }
+</style>
+</head>
+
+<body id="top">
+<!-- Navigation bar -->
+<nav class="navbar navbar-expand-lg navbar-dark segi-nav fixed-top">
+  <div class="container">
+    <!-- LOGO + BRAND -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <img src="logo.png" alt="SEGi logo" width="40" height="40" class="rounded">
+      <span class="fw-bold">SEGi Timetable</span>
+    </a>
+
+    <!-- MOBILE TOGGLER -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- NAV CONTENT -->
+    <div id="mainnav" class="collapse navbar-collapse">
+      <!-- LEFT SIDE NAV ITEMS -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="index.html">Home</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="teachers.html">Teachers</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="manage_subjects.html">Manage Courses</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="generate_timetable.html">Course Selection</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="view_timetables.html">View Timetables</a>
+        </li>
+      </ul>
+
+      <!-- SEARCH BAR -->
+      <form class="segi-search d-none d-lg-flex me-2" role="search" onsubmit="return false;">
+        <i class="bi bi-search"></i>
+        <input class="form-control form-control-sm segi-search-input"
+               type="search" placeholder="Search… (Ctrl+/)">
+      </form>
+
+      <!-- LOGIN BUTTON -->
+      <a class="btn btn-sm btn-outline-light rounded-pill" href="login.php">Login</a>
+    </div> <!-- END collapse -->
+  </div> <!-- END container -->
+</nav>
+
+<main class="workspace">
+  <section class="workspace-header">
+    <div>
+      <p class="workspace-eyebrow">Schedules</p>
+      <h1>Generated Timetable</h1>
+      <p class="workspace-subtitle">
+        Review the automatically allocated sessions, download a PDF, and fine-tune the calendar before publishing.
+      </p>
+    </div>
+    <div class="workspace-actions">
+      <button type="button" class="btn-outline" onclick="goBack()">Back to Selection</button>
+    </div>
+  </section>
+
+  <section class="surface-card">
+    <div class="section-heading">
+      <h2>PDF header details</h2>
+      <p>Adjust these values to match the official template before exporting the timetable.</p>
+    </div>
+    <form id="pdfMetaForm" class="form-grid two-column">
+      <div>
+        <label for="metaInstitution">Institution name</label>
+        <input type="text" id="metaInstitution" data-meta-key="institution" placeholder="SEGi College Subang Jaya" />
+      </div>
+      <div>
+        <label for="metaDepartment">School / faculty</label>
+        <input type="text" id="metaDepartment" data-meta-key="department" placeholder="School of Information Technology" />
+      </div>
+      <div>
+        <label for="metaHeader">Header title</label>
+        <input type="text" id="metaHeader" data-meta-key="headerTitle" placeholder="FULL-TIME PROGRAMME TIMETABLE" />
+      </div>
+      <div>
+        <label for="metaProgramme">Programme title</label>
+        <input type="text" id="metaProgramme" data-meta-key="programmeName" placeholder="Diploma in Information Technology (DIT)" />
+      </div>
+      <div>
+        <label for="metaSession">Session</label>
+        <input type="text" id="metaSession" data-meta-key="session" placeholder="September 2025 Session" />
+      </div>
+      <div>
+        <label for="metaClassStart">Start of class</label>
+        <input type="text" id="metaClassStart" data-meta-key="classStart" placeholder="09 September 2025" />
+      </div>
+      <div>
+        <label for="metaAcademicYear">Academic year</label>
+        <input type="text" id="metaAcademicYear" data-meta-key="academicYear" placeholder="2025/2026" />
+      </div>
+      <div>
+        <label for="metaClassEnd">End of class</label>
+        <input type="text" id="metaClassEnd" data-meta-key="classEnd" placeholder="07 December 2025" />
+      </div>
+      <div>
+        <label for="metaIntake">Intake</label>
+        <input type="text" id="metaIntake" data-meta-key="intake" placeholder="September Intake" />
+      </div>
+      <div>
+        <label for="metaFinalExam">Final exam</label>
+        <input type="text" id="metaFinalExam" data-meta-key="finalExam" placeholder="08 December 2025 - 21 December 2025" />
+      </div>
+      <div class="full-span">
+        <label for="metaNotes">Footer notes (one per line)</label>
+        <textarea id="metaNotes" data-meta-key="notes" rows="3"
+                  placeholder="Refer to official notices for updated venues."></textarea>
+      </div>
+    </form>
+  </section>
+
+  <section class="surface-card">
+    <div class="section-heading">
+      <h2>Timetable summary</h2>
+      <p>The table lists each scheduled session with lecturer, mode, and venue placeholders. Unassigned items highlight where additional data is required.</p>
+    </div>
+    <div id="infoText" class="info-banner is-hidden"></div>
+    <div id="timetable-container"></div>
+    <div class="form-actions">
+      <button id="exportBtn">Export PDF</button>
+    </div>
+  </section>
+
+  <section id="calendar-section" class="surface-card" hidden>
+    <div class="section-heading">
+      <h2>Calendar view</h2>
+      <p>Visualise the same data in a weekly grid to spot clashes and gaps quickly.</p>
+    </div>
+    <div class="table-wrap">
+      <table id="calendarTable" class="calendar-table">
+        <!-- Calendar table will be populated by script -->
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="footer-segi">
+  <div class="container">
+    <div class="row g-4 align-items-start">
+      <!-- Brand Column -->
+      <div class="col-md-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <img src="logo.png" width="40" height="40" class="rounded" alt="SEGi mark">
+          <span class="brand h6 mb-0">SEGi Timetable</span>
+        </div>
+        <p class="small text-muted mb-0">
+          Timetable Management System prototype for SEGi College Kuala Lumpur.
+          Generate and publish clash-free schedules.
+        </p>
+      </div>
+
+      <!-- Quick Links Column -->
+      <div class="col-md-4 col-lg-3">
+        <h6 class="mb-2">Quick Links</h6>
+        <ul class="list-unstyled small mb-0">
+          <li><a class="footer-link" href="view_timetables.html">Timetable</a></li>
+          <li><a class="footer-link" href="generate_timetable.html">Generator</a></li>
+          <li><a class="footer-link" href="schedule.html">Reports</a></li>
+          <li><a class="footer-link" href="index.html">Documentation</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Column -->
+      <div class="col-md-3">
+        <h6 class="mb-2">Contact</h6>
+        <ul class="list-unstyled small mb-3">
+          <li><i class="bi bi-geo-alt me-2"></i>SEGi College Kuala Lumpur</li>
+          <li><i class="bi bi-envelope me-2"></i>it-projects@segi.edu.my</li>
+        </ul>
+
+        <div class="d-flex align-items-center justify-content-start gap-2 social-links">
+          <a aria-label="Facebook" href="#"><i class="bi bi-facebook"></i></a>
+          <a aria-label="Instagram" href="#"><i class="bi bi-instagram"></i></a>
+          <a aria-label="LinkedIn" href="#"><i class="bi bi-linkedin"></i></a>
+          <a aria-label="YouTube" href="#"><i class="bi bi-youtube"></i></a>
+          <a aria-label="X (Twitter)" href="#"><i class="bi bi-twitter-x"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center small py-2 gap-2">
+      <div>© 2025 SEGi College Kuala Lumpur — Time Table Generator</div>
+      <div class="d-flex align-items-center gap-3">
+        <a href="#top" class="back-to-top">Back to top</a>
+        <span class="text-muted">Developed by Internship Team • Prototype UI</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- PDF Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<!-- Your PDF utilities -->
+<script src="pdf-utils.js"></script>
+<script src="scripts.js"></script>
+
+
+
+<script>
+/**
+ * Generate schedule from selected programme / courses / teachers,
+ * store everything in the database, and render table + calendar.
+ * programme + selectedCourses + studyMode come from API or localStorage.
+ */
+
+// Global variables
+let globalSchedule = [];
+let schedule = [];
+let teachers = [];
+
+let programme, studyMode, studyModeLabel, programmeLabel;
+let selectedCourses = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+  // ---- LOAD GENERATION REQUEST (API first, then localStorage) ----
+  async function loadGenerationRequest() {
+    // 1) Try API first
+    try {
+      const response = await fetch("api/get_generation_request.php");
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+
+      const data = await response.json();
+      programme = data.programme ?? data.programme_id ?? null;
+      studyMode = data.studyMode ?? data.study_mode ?? null;
+      selectedCourses = Array.isArray(data.courses) ? data.courses : [];
+      console.log('Loaded generation request from API:', {
+        programme,
+        studyMode,
+        count: selectedCourses.length
+      });
+    } catch (err) {
+      console.warn('API generation request failed, falling back to localStorage:', err);
+    }
+
+    // 2) If API didn’t give anything, use localStorage
+    if ((!programme && !studyMode) || !Array.isArray(selectedCourses) || selectedCourses.length === 0) {
+      try {
+        const raw = localStorage.getItem('timetableGenerationRequest');
+        if (raw) {
+          const stored = JSON.parse(raw);
+          programme = programme ?? stored.programme ?? stored.programmeId ?? null;
+          studyMode = studyMode ?? stored.studyMode ?? stored.studyModeLabel ?? null;
+          selectedCourses = Array.isArray(stored.selectedCourses)
+            ? stored.selectedCourses
+            : (Array.isArray(stored.courses) ? stored.courses : []);
+          console.log('Loaded generation request from localStorage:', {
+            programme,
+            studyMode,
+            count: selectedCourses.length
+          });
+        } else {
+          console.warn('No timetableGenerationRequest found in localStorage');
+        }
+      } catch (e) {
+        console.error('Failed to read timetableGenerationRequest from localStorage:', e);
+      }
+    }
+
+    if (!Array.isArray(selectedCourses)) {
+      selectedCourses = [];
+    }
+  }
+
+  await loadGenerationRequest();
+
+  const normaliseStudyMode = value => {
+    if (!value) return 'full-time';
+    const lowered = value.toString().toLowerCase();
+    if (lowered === 'part-time' || lowered === 'part time') return 'part-time';
+    return 'full-time';
+  };
+
+  if (!studyMode) {
+    const existingMode = (selectedCourses.find(course => course && course.studyMode) || {}).studyMode;
+    if (existingMode) {
+      studyMode = existingMode;
+    }
+  }
+
+  studyMode = normaliseStudyMode(studyMode);
+  studyModeLabel = studyMode === 'part-time' ? 'Part-Time' : 'Full-Time';
+  programmeLabel = programme ? `${programme} (${studyModeLabel})` : studyModeLabel;
+
+  const info       = document.getElementById('infoText');
+  const container  = document.getElementById('timetable-container');
+  const exportBtn  = document.getElementById('exportBtn');
+  const metadataForm = document.getElementById('pdfMetaForm');
+
+  // ---------- PDF METADATA ----------
+  const metadataKeys = [
+    'institution','department','headerTitle','programmeName',
+    'session','classStart','academicYear','classEnd',
+    'intake','finalExam','notes'
+  ];
+  const metadataInputs = {};
+  if (metadataForm) {
+    metadataKeys.forEach(key => {
+      const input = metadataForm.querySelector(`[data-meta-key="${key}"]`);
+      if (input) metadataInputs[key] = input;
+    });
+  }
+
+  const normaliseValue = element => {
+    if (!element) return '';
+    const raw = element.tagName === 'TEXTAREA'
+      ? element.value.replace(/\r\n/g, '\n')
+      : element.value;
+    return raw.trim();
+  };
+
+  const today = new Date();
+  const defaultYear = today.getFullYear();
+  const defaultMetadata = {
+    institution : 'SEGi College Subang Jaya',
+    department  : 'School of Information Technology',
+    headerTitle : 'FULL-TIME PROGRAMME TIMETABLE',
+    programmeName: programmeLabel || '',
+    session     : `${today.toLocaleString('default', { month: 'long' })} ${today.getFullYear()} Session`,
+    classStart  : '09 September 2025',
+    academicYear: `${defaultYear}/${defaultYear + 1}`,
+    classEnd    : '07 December 2025',
+    intake      : `${today.toLocaleString('default', { month: 'long' })} ${today.getFullYear()}`,
+    finalExam   : '08 December 2025 - 21 December 2025',
+    notes       : 'This timetable is generated electronically and is subject to change.\n' +
+                  'Refer to official notices for updated venues or lecturers.\n' +
+                  'Contact the programme leader for clarification on any discrepancies.'
+  };
+
+  const metadataState = { ...defaultMetadata };
+  if (programmeLabel && !metadataState.programmeName) {
+    metadataState.programmeName = programmeLabel;
+  }
+
+  Object.entries(metadataInputs).forEach(([key, input]) => {
+    if (metadataState[key] !== undefined && metadataState[key] !== null) {
+      input.value = metadataState[key];
+    }
+    input.addEventListener('change', () => {
+      metadataState[key] = normaliseValue(input);
+    });
+  });
+
+  const collectMetadata = () => {
+    const meta = {};
+    Object.entries(metadataInputs).forEach(([key, input]) => {
+      meta[key] = normaliseValue(input);
+    });
+    return meta;
+  };
+
+  // ---------- DATABASE API HELPERS ----------
+  async function loadTeachersFromDatabase() {
+    try {
+      const response = await fetch('api/teachers.php');
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        return data.map(t => ({
+          name: t.name,
+          maxHoursPerWeek: t.max_hours_per_week ?? t.max_hours ?? 18,
+          maxHours: t.max_hours_per_week ?? t.max_hours ?? 18,
+          breakTime: t.break_time || 'None',
+          offDays: JSON.parse(t.off_days || '[]')
+        }));
+      }
+
+      if (data.success && Array.isArray(data.teachers)) {
+        return data.teachers.map(t => ({
+          name: t.name,
+          maxHoursPerWeek: t.max_hours_per_week ?? t.max_hours ?? 18,
+          maxHours: t.max_hours_per_week ?? t.max_hours ?? 18,
+          breakTime: t.break_time || 'None',
+          offDays: t.off_days || '[]'
+        }));
+      }
+
+      console.error('Unexpected teachers API response:', data);
+      return [];
+    } catch (error) {
+      console.error('Error loading teachers from database:', error);
+      return [];
+    }
+  }
+
+  async function loadSubjectsFromDatabase(programme) {
+    try {
+      const response = await fetch(
+        `api/programme_data.php?action=subjects&programme=${encodeURIComponent(programme)}`
+      );
+      const result = await response.json();
+      if (result.success && result.subjects) {
+        return result.subjects;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error loading subjects from database:', error);
+      return [];
+    }
+  }
+
+  async function saveScheduleToDatabase(scheduleData) {
+    console.log('Save to database function called with schedule:', scheduleData);
+    try {
+      const metadata = collectMetadata();
+      console.log('Collected metadata:', metadata);
+
+      const payload = {
+        programme,
+        studyMode,
+        schedule: scheduleData.map(entry => ({
+          subjectCode : entry.subjectCode || entry.subject,
+          subject     : entry.subject,
+          programme   : entry.programme,
+          cohort      : entry.cohort,
+          day         : entry.day,
+          timeRange   : entry.timeRange,
+          dayTime     : entry.dayTime,
+          mode        : entry.mode,
+          lecturer    : entry.lecturer,
+          venue       : entry.venue,
+          type        : entry.type,
+          hours       : entry.hours,
+          crossTeaching: entry.crossTeaching,
+          startSlot   : entry.startSlot
+        })),
+        metadata,
+        status: 'draft'
+      };
+
+      console.log('Sending payload to API:', payload);
+
+      const response = await fetch('api/schedules.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      console.log('API response:', result);
+      if (result.success) {
+        console.log('Schedule saved to database successfully');
+        return result.timetableId;
+      } else {
+        console.error('Failed to save schedule:', result.message);
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error saving schedule to database:', error);
+      throw error;
+    }
+  }
+
+  async function loadScheduleFromDatabase() {
+    try {
+      const response = await fetch(
+        `api/schedules.php?programme=${encodeURIComponent(programme)}&studyMode=${encodeURIComponent(studyMode)}`
+      );
+      const result = await response.json();
+      if (result.success && result.timetable) {
+        return {
+          schedule: result.timetable.entries.map(entry => ({
+            subject    : `${entry.subject_code} - ${entry.subject_name}`,
+            subjectCode: entry.subject_code,
+            programme  : programme,
+            cohort     : studyModeLabel,
+            day        : entry.day_of_week,
+            dayTime    : entry.day_of_week && entry.start_time && entry.end_time
+              ? `${entry.day_of_week}, ${formatTime(entry.start_time)} - ${formatTime(entry.end_time)}`
+              : 'N/A',
+            timeRange  : entry.start_time && entry.end_time
+              ? `${formatTime(entry.start_time)} - ${formatTime(entry.end_time)}`
+              : 'N/A',
+            mode       : entry.delivery_mode || 'Offline',
+            lecturer   : entry.teacher_name || 'Unassigned',
+            venue      : entry.venue || 'TBA',
+            type       : entry.session_type === 'lecture'
+              ? 'Lecture'
+              : entry.session_type === 'tutorial'
+              ? 'Tutorial'
+              : 'Standard',
+            hours      : entry.duration_hours || 3,
+            crossTeaching: entry.cross_teaching || false,
+            startSlot  : entry.start_time ? timeToSlot(entry.start_time) : null
+          })),
+          metadata: result.timetable.metadata || {}
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading schedule from database:', error);
+      return null;
+    }
+  }
+
+  function formatTime(timeString) {
+    if (!timeString) return '';
+    const [hour, minute] = timeString.split(':').map(Number);
+    const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+  }
+
+  function timeToSlot(timeString) {
+    if (!timeString) return null;
+    const [hour] = timeString.split(':').map(Number);
+    return Math.max(0, hour - 8); // 8 AM = slot 0
+  }
+
+  // ---------- SUBJECT CATALOG / CUSTOM SUBJECTS ----------
+  const defaultSubjectCatalog = {
+    DCS: [
+      { code: 'DCS101', name: 'Intro to Programming', hours: 3 },
+      { code: 'DCS102', name: 'Data Structures',    hours: 3 },
+      { code: 'DCS103', name: 'Database Systems',   hours: 3 },
+      { code: 'DCS104', name: 'Web Development',    hours: 3 }
+    ],
+    DIIT: [
+      { code: 'DIT101', name: 'Computer Fundamentals', hours: 3 },
+      { code: 'DIT102', name: 'Operating Systems',     hours: 3 },
+      { code: 'DIT103', name: 'Network Essentials',    hours: 3 },
+      { code: 'DIT104', name: 'Programming Logic',     hours: 3 }
+    ],
+    CIT: [
+      { code: 'CIT101', name: 'Information Technology Basics', hours: 3 },
+      { code: 'CIT102', name: 'Spreadsheet Skills',            hours: 3 },
+      { code: 'CIT103', name: 'Introduction to Databases',     hours: 3 }
+    ],
+    BCS: [
+      { code: 'BCS101', name: 'Software Engineering',    hours: 3 },
+      { code: 'BCS102', name: 'Computer Architecture',   hours: 3 },
+      { code: 'BCS103', name: 'Advanced Networking',     hours: 3 },
+      { code: 'BCS104', name: 'Artificial Intelligence', hours: 3 }
+    ],
+    FIIT: [
+      { code: 'FIIT1114', name: 'Basic Mathematics',                 hours: 3 },
+      { code: 'FIIT1124', name: 'Fundamentals of Information Technology', hours: 3 },
+      { code: 'FIIT1133', name: 'English',                           hours: 3 },
+      { code: 'FIIT1143', name: 'Personal and Professional Development', hours: 3 },
+      { code: 'FIIT1154', name: 'Programming Methodology',           hours: 3 }
+    ]
+  };
+
+  let customSubjects = {};
+
+  // ---------- UTILITIES ----------
+  function getBreakIndices(breakTime) {
+    const indices = [];
+    if (!breakTime || breakTime === 'None') return indices;
+    const time = breakTime.toLowerCase();
+    if (time.includes('12') && time.includes('1')) {
+      indices.push(3); // 12–1
+    }
+    if (time.includes('1') && time.includes('2')) {
+      indices.push(4); // 1–2
+    }
+    return indices;
+  }
+
+  const subjectColors = {};
+  const colorPalette = [
+    '#e3f2fd', '#f3e5f5', '#e8f5e8', '#fff3e0', '#fce4ec',
+    '#e0f2f1', '#f1f8e9', '#fdf2e4', '#e8eaf6', '#fff8e1',
+    '#ffebee', '#f2f7fb', '#e7f3ff', '#f0f4c3', '#ffe0f7'
+  ];
+  function getSubjectColor(subjectCode) {
+    if (!subjectCode) return '#f5f5f5';
+    if (!subjectColors[subjectCode]) {
+      const hash = subjectCode.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      subjectColors[subjectCode] =
+        colorPalette[Math.abs(hash) % colorPalette.length];
+    }
+    return subjectColors[subjectCode];
+  }
+
+  const deriveSessionDetails = sel => {
+    if (!sel) {
+      return {
+        durationHours: 3,
+        crossTeaching: false,
+        sessionLabel : 'Standard Session (3 hours)'
+      };
+    }
+    const normaliseHours = value => {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? numeric : null;
+    };
+    const hasExplicitDuration =
+      sel.durationHours !== undefined && sel.durationHours !== null;
+    if (hasExplicitDuration) {
+      const parsed = normaliseHours(sel.durationHours);
+      if (parsed && parsed > 0) {
+        const hours = Math.round(parsed);
+        const safeHours = Math.min(9, Math.max(1, hours));
+        return {
+          durationHours: safeHours,
+          crossTeaching: sel.crossTeaching || false,
+          sessionLabel : `Session (${safeHours} hours)`
+        };
+      }
+    }
+    if (sel.type === 'Tutorial') {
+      return {
+        durationHours: 1,
+        crossTeaching: false,
+        sessionLabel : 'Tutorial (1 hour)'
+      };
+    }
+    if (sel.type === 'Lecture') {
+      return {
+        durationHours: 3,
+        crossTeaching: false,
+        sessionLabel : 'Lecture (3 hours)'
+      };
+    }
+    if (sel.crossTeaching) {
+      return {
+        durationHours: 2,
+        crossTeaching: true,
+        sessionLabel : 'Cross-teaching (2 hours)'
+      };
+    }
+    return {
+      durationHours: 3,
+      crossTeaching: false,
+      sessionLabel : 'Standard Session (3 hours)'
+    };
+  };
+
+  function formatTimeSlot(slot) {
+    const formatHour = h => {
+      const hour12 = h % 12 === 0 ? 12 : h % 12;
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      return `${hour12}:00 ${suffix}`;
+    };
+    return `${formatHour(slot.start)} - ${formatHour(slot.end)}`;
+  }
+
+  // ---------- SCHEDULING ----------
+  function generateSchedule() {
+    globalSchedule = [];
+    const timeslots = [];
+    for (let h = 9; h < 18; h++) {
+      timeslots.push({ start: h, end: h + 1 });
+    }
+
+    // Dynamic weekly days based on cohort
+    let days = [];
+    if (studyMode === 'full-time') {
+      days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    } else {
+      days = ['Saturday', 'Sunday'];
+    }
+
+    const teacherData = teachers.map(t => {
+      const rawLimit = t.maxHoursPerWeek != null ? t.maxHoursPerWeek : t.maxHours;
+      const parsedLimit = parseInt(rawLimit, 10);
+      const maxHoursPerWeek = Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? parsedLimit
+        : 18;
+
+      let offDays = [];
+      if (t.offDays) {
+        try {
+          if (typeof t.offDays === 'string') {
+            offDays = JSON.parse(t.offDays);
+          } else if (Array.isArray(t.offDays)) {
+            offDays = t.offDays;
+          }
+          if (!Array.isArray(offDays)) offDays = [];
+        } catch (e) {
+          console.warn('Failed to parse off_days for teacher', t.name, ':', t.offDays);
+          offDays = [];
+        }
+      }
+
+      const breakIndices = getBreakIndices(t.breakTime);
+      console.log(
+        `Teacher ${t.name}: offDays=${JSON.stringify(offDays)}, breakIndices=${JSON.stringify(breakIndices)}`
+      );
+      return {
+        name: t.name,
+        maxHoursPerWeek,
+        offDays: offDays.map(day => day.toLowerCase()),
+        breakIndices,
+        assignedHours: 0,
+        schedule: {}
+      };
+    });
+
+    teacherData.forEach(teacher => {
+      days.forEach(day => {
+        teacher.schedule[day] = [];
+      });
+    });
+
+    const subjectsToSchedule = [];
+    const unifiedCatalog = {};
+
+    for (const p in defaultSubjectCatalog) {
+      unifiedCatalog[p] = defaultSubjectCatalog[p].slice();
+    }
+    for (const p in customSubjects) {
+      unifiedCatalog[p] = (customSubjects[p] || []).map(s => ({
+        code : s.code || s.identifier || '',
+        name : s.name || s.code || s.identifier || '',
+        hours: s.hours || 3
+      }));
+    }
+
+    selectedCourses.forEach(sel => {
+      const candidateCodes = [
+        sel.identifier, sel.code, sel.newCode, sel.legacyCode
+      ].filter(Boolean);
+      let subjectObj = null;
+      for (const prog in unifiedCatalog) {
+        for (const subject of unifiedCatalog[prog]) {
+          if (candidateCodes.includes(subject.code)) {
+            subjectObj = subject;
+            break;
+          }
+        }
+        if (subjectObj) break;
+      }
+
+      const sessionMeta = deriveSessionDetails(sel);
+      const displayCode =
+        sel.newCode || sel.code || sel.identifier || (subjectObj ? subjectObj.code : '');
+      const fallbackName =
+        subjectObj ? subjectObj.name : (sel.name || displayCode || 'Course');
+      const creditHours =
+        (subjectObj && Number.isFinite(Number(subjectObj.hours)))
+          ? Number(subjectObj.hours)
+          : Math.max(1, sessionMeta.durationHours || 3);
+
+      subjectsToSchedule.push({
+        code: displayCode,
+        name: fallbackName,
+        programme,
+        durationHours: sessionMeta.durationHours,
+        crossTeaching: sessionMeta.crossTeaching,
+        type: sessionMeta.sessionLabel,
+        originalType: sel.type,
+        deliveryMode: sel.type?.toLowerCase().includes('tutorial')
+          ? (sel.tutorialMode || sel.tutorialDeliveryMode || 'Offline')
+          : (sel.lectureMode || sel.lectureDeliveryMode || sel.mode || 'Offline'),
+        sessionVariant: sel.sessionVariant || null,
+        preferredTeacher: sel.preferredTeacher || null,
+        hours: creditHours
+      });
+    });
+
+    function isTeacherAvailable(teacher, day, startSlot, duration) {
+      console.log(
+        `Checking availability: ${teacher.name}, ${day}, slot ${startSlot}-${startSlot + duration - 1}`
+      );
+      const dayLower = day.toLowerCase();
+      if (teacher.offDays.includes(dayLower)) {
+        console.log(`❌ ${teacher.name} is off on ${day}`);
+        return false;
+      }
+      if (teacher.assignedHours + duration > teacher.maxHoursPerWeek) {
+        console.log(
+          `❌ ${teacher.name} would exceed weekly limit: ${teacher.assignedHours} + ${duration} > ${teacher.maxHoursPerWeek}`
+        );
+        return false;
+      }
+      for (let i = 0; i < duration; i++) {
+        const slotIndex = startSlot + i;
+        if (slotIndex >= timeslots.length) {
+          console.log(`❌ Slot ${slotIndex} outside working hours`);
+          return false;
+        }
+        if (teacher.breakIndices.includes(slotIndex)) {
+          console.log(`❌ Slot ${slotIndex} conflicts with break`);
+          return false;
+        }
+        if (teacher.schedule[day] && teacher.schedule[day].includes(slotIndex)) {
+          console.log(`❌ Slot ${slotIndex} already assigned`);
+          return false;
+        }
+      }
+      console.log(`✅ ${teacher.name} is available`);
+      return true;
+    }
+
+    function assignTeacherSlots(teacher, day, startSlot, duration) {
+      for (let i = 0; i < duration; i++) {
+        teacher.schedule[day].push(startSlot + i);
+      }
+      teacher.assignedHours += duration;
+    }
+
+    console.log(`Starting to schedule ${subjectsToSchedule.length} courses with ${teacherData.length} teachers`);
+
+    subjectsToSchedule.forEach(course => {
+      console.log(`\n📚 Processing course: ${course.code}`);
+      const hoursNeeded = Math.min(
+        timeslots.length,
+        Math.max(1, Math.round(course.durationHours || 3))
+      );
+      let assigned = false;
+
+      const preferredTeacherName = course.preferredTeacher
+        ? course.preferredTeacher.trim()
+        : '';
+      const preferredTeacher = preferredTeacherName
+        ? teacherData.find(t => t.name === preferredTeacherName)
+        : null;
+
+      const candidateTeachers = preferredTeacher ? [preferredTeacher] : teacherData;
+
+      for (const teacher of candidateTeachers) {
+        if (assigned) break;
+        for (const day of days) {
+          if (assigned) break;
+          for (let startSlot = 0; startSlot <= timeslots.length - hoursNeeded; startSlot++) {
+            if (isTeacherAvailable(teacher, day, startSlot, hoursNeeded)) {
+              assignTeacherSlots(teacher, day, startSlot, hoursNeeded);
+              const startTime = timeslots[startSlot].start;
+              const endTime   = timeslots[startSlot + hoursNeeded - 1].end;
+              const timeRange = formatTimeSlot({ start: startTime, end: endTime });
+
+              const finalMode = course.deliveryMode?.toLowerCase() === 'online'
+                ? 'Online'
+                : 'Offline';
+              const finalVenue = finalMode === 'Online' ? 'Online' : 'TBA';
+
+              globalSchedule.push({
+                subject: `${course.code} - ${course.name}`,
+                subjectCode: course.code,
+                programme: course.programme,
+                cohort: studyModeLabel,
+                day,
+                startSlot,
+                timeRange,
+                dayTime: `${day}, ${timeRange}`,
+                mode: finalMode,
+                lecturer: course.preferredTeacher || teacher.name,
+                venue: finalVenue,
+                type: course.type,
+                hours: hoursNeeded,
+                crossTeaching: course.crossTeaching || false,
+                color: getSubjectColor(course.code)
+              });
+
+              assigned = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!assigned) {
+        const finalMode = course.deliveryMode?.toLowerCase() === 'online'
+          ? 'Online'
+          : 'Offline';
+        const finalVenue = finalMode === 'Online' ? 'Online' : 'TBA';
+        globalSchedule.push({
+          subject: `${course.code} - ${course.name}`,
+          subjectCode: course.code,
+          programme: course.programme,
+          cohort: studyModeLabel,
+          day: 'N/A',
+          startSlot: null,
+          timeRange: 'N/A',
+          dayTime: 'N/A',
+          mode: finalMode,
+          lecturer: course.preferredTeacher || 'Unassigned',
+          venue: finalVenue,
+          type: course.type,
+          hours: hoursNeeded,
+          crossTeaching: course.crossTeaching || false,
+          color: getSubjectColor(course.code)
+        });
+      }
+    });
+
+    return globalSchedule;
+  }
+
+  async function saveTimetableToDatabase(schedule, metadata, programme, studyMode) {
+    try {
+      const payload = {
+        programme_id: programme,
+        study_mode: studyMode,
+        academic_year: metadata.academicYear,
+        session: metadata.session,
+        metadata,
+        schedule: schedule.map(item => ({
+          subject_code: item.subjectCode,
+          lecturer: item.lecturer,
+          day_of_week: item.day,
+          start_time: item.timeRange !== "N/A"
+            ? item.timeRange.split(" - ")[0]
+            : null,
+          end_time: item.timeRange !== "N/A"
+            ? item.timeRange.split(" - ")[1]
+            : null,
+          delivery_mode: item.mode,
+          venue: item.mode?.toLowerCase() === "online" ? "Online" : "TBA",
+          session_type:
+            item.originalType?.toLowerCase().includes("tut") ? "tutorial" :
+            item.originalType?.toLowerCase().includes("lec") ? "lecture" :
+            "standard",
+          duration_hours: item.hours,
+          cross_teaching: item.crossTeaching ? 1 : 0
+        }))
+      };
+
+      const res = await fetch('api/save_timetable.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json();
+      console.log('Timetable saved:', json);
+      if (!json.success) alert('Error: ' + json.error);
+      return json.timetable_id;
+    } catch (e) {
+      console.error('Save timetable failed:', e);
+    }
+  }
+
+
+    // ---------- MAIN INITIALISE ----------
+  async function initializeSchedule() {
+    console.log('Loading teachers and subjects from database...');
+    try {
+      const dbTeachers = await loadTeachersFromDatabase();
+      if (dbTeachers.length > 0) {
+        teachers.splice(0, teachers.length, ...dbTeachers);
+        console.log(`✓ Loaded ${teachers.length} teachers from database`);
+      }
+
+      if (programme) {
+        const dbSubjects = await loadSubjectsFromDatabase(programme);
+        if (dbSubjects.length > 0) {
+          customSubjects[programme] = dbSubjects.map(s => ({
+            code: s.code || s.new_code,
+            name: s.name,
+            hours: s.credit_hours || 3
+          }));
+          console.log(`✓ Loaded ${dbSubjects.length} subjects for ${programme} from database`);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading data from database:', error);
+      console.log('Falling back to default subject catalog only');
+    }
+
+    if (!teachers.length) {
+      info.classList.remove('is-hidden');
+      info.innerHTML = `
+        <strong>No teachers available!</strong><br>
+        <a href="teachers.html">Add teachers</a> first to generate schedules.
+      `;
+      info.style.backgroundColor = '#f8d7da';
+      info.style.color = '#721c24';
+      exportBtn.disabled = true;
+      container.innerHTML = '';
+      return;
+    }
+
+    console.log(`Starting schedule generation with ${teachers.length} teachers and ${selectedCourses.length} courses...`);
+
+    let loadedFromDatabase = false;
+
+    const existingScheduleData = await loadScheduleFromDatabase();
+    if (existingScheduleData && existingScheduleData.schedule.length > 0) {
+      schedule = existingScheduleData.schedule;
+      globalSchedule = existingScheduleData.schedule;
+      loadedFromDatabase = true;
+
+      const loadedMetadata = existingScheduleData.metadata;
+      if (loadedMetadata) {
+        Object.entries(metadataInputs).forEach(([key, input]) => {
+          if (loadedMetadata[key] !== undefined && loadedMetadata[key] !== null) {
+            input.value = loadedMetadata[key];
+            metadataState[key] = loadedMetadata[key];
+          }
+        });
+      }
+
+      info.classList.remove('is-hidden');
+      info.textContent = 'Loaded existing timetable from database. Make changes and save to update.';
+      info.style.backgroundColor = '#d4edda';
+      info.style.color = '#155724';
+    } else {
+      // No existing timetable in DB – need to generate from selectedCourses
+      if (!programme || !selectedCourses.length) {
+        info.classList.remove('is-hidden');
+        info.textContent =
+          'No timetable found for this programme. Please generate it first from the Course Selection page.';
+        exportBtn.disabled = true;
+        container.innerHTML = '';
+        return;
+      }
+
+      console.log('Generating new schedule with clash-free algorithm...');
+      generateSchedule();
+      schedule = globalSchedule;
+      const metadata = { ...defaultMetadata, ...metadataState, ...collectMetadata() };
+      await saveTimetableToDatabase(globalSchedule, metadata, programme, studyMode);
+      info.classList.add('is-hidden');
+    }
+
+    if (!globalSchedule.length) {
+      info.classList.remove('is-hidden');
+      info.textContent = 'No courses could be scheduled. Please ensure there are teachers and courses available.';
+      exportBtn.disabled = true;
+      container.innerHTML = '';
+      return;
+    }
+
+    info.classList.add('is-hidden');
+
+    // ---------- RENDER SUMMARY TABLE ----------
+    let html = `
+<table class="schedule-table">
+  <thead>
+    <tr>
+      <th>Subject</th>
+      <th>Cohort</th>
+      <th>Day</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Mode</th>
+      <th>Lecturer</th>
+      <th>Venue</th>
+    </tr>
+  </thead>
+  <tbody>
+`;
+
+    globalSchedule.forEach(row => {
+      const subjectLabel = row.type ? `${row.subject} (${row.type})` : row.subject;
+      const cohortLabel = row.cohort || studyModeLabel;
+
+      let teachingMode;
+      if (row.originalType && /tutorial/i.test(row.originalType)) {
+        teachingMode = 'Tutorial';
+      } else if (row.originalType && /lecture/i.test(row.originalType)) {
+        teachingMode = 'Lecture';
+      } else if (row.crossTeaching) {
+        teachingMode = row.hours && row.hours <= 1 ? 'Tutorial' : 'Lecture';
+      } else if (row.type && /tutorial/i.test(row.type)) {
+        teachingMode = 'Tutorial';
+      } else if (row.type && /lecture/i.test(row.type)) {
+        teachingMode = 'Lecture';
+      } else {
+        teachingMode = 'Lecture';
+      }
+
+      const normalizedMode = row.mode ? row.mode : (row.delivery_mode || 'Offline');
+      const venueDisplay = normalizedMode.toLowerCase() === 'online'
+        ? 'Online'
+        : (row.venue || 'TBA');
+
+      const [startTime, endTime] =
+        row.timeRange && row.timeRange.includes(' - ')
+          ? row.timeRange.split(' - ')
+          : ['N/A', 'N/A'];
+
+      html += `
+  <tr>
+    <td>${row.subject_name || subjectLabel}</td>
+    <td>${cohortLabel}</td>
+    <td>${row.day}</td>
+    <td>${startTime}</td>
+    <td>${endTime}</td>
+    <td>${teachingMode}</td>
+    <td>${row.lecturer}</td>
+    <td>${venueDisplay}</td>
+  </tr>
+`;
+    });
+
+    html += '</tbody></table>';
+
+    const saveButtonHtml = loadedFromDatabase
+      ? '<button id="updateScheduleBtn" class="btn-outline">Update Schedule in Database</button>'
+      : '<button id="saveScheduleBtn" class="btn-outline">Save Schedule to Database</button>';
+
+    container.innerHTML =
+      '<div class="table-wrap schedule-wrap">' + html + '</div>' +
+      '<div class="form-actions mt-3">' + saveButtonHtml + '</div>';
+    exportBtn.disabled = false;
+
+    const saveBtn = document.getElementById(loadedFromDatabase ? 'updateScheduleBtn' : 'saveScheduleBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        const originalText = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = loadedFromDatabase ? 'Updating...' : 'Saving...';
+        try {
+          await saveScheduleToDatabase(globalSchedule);
+          saveBtn.textContent = loadedFromDatabase ? 'Updated!' : 'Saved!';
+          setTimeout(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+          }, 2000);
+        } catch (error) {
+          alert('Failed to save schedule to database: ' + error.message);
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
+        }
+      });
+    }
+
+    renderCalendar();
+  }
+
+  // ---------- CALENDAR RENDERING ----------
+  function renderCalendar() {
+    const calendarSection = document.getElementById('calendar-section');
+    const calTable = document.getElementById('calendarTable');
+    calTable.innerHTML = '';
+
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const timeSlots = [];
+
+    for (let h = 9; h < 18; h++) {
+      const startHour = h;
+      const endHour   = h + 1;
+      const formatHour = hr => {
+        const hour12 = hr > 12 ? hr - 12 : (hr === 0 ? 12 : hr);
+        const ampm = hr >= 12 ? 'PM' : 'AM';
+        return `${hour12}:00 ${ampm}`;
+      };
+      timeSlots.push({
+        label: `${formatHour(startHour)} - ${formatHour(endHour)}`,
+        hour: startHour,
+        index: h - 9
+      });
+    }
+
+    let calendarHTML = `
+      <table class="table table-bordered calendar-table">
+        <thead>
+          <tr class="calendar-header">
+            <th class="time-column">Time</th>`;
+
+    days.forEach(day => {
+      calendarHTML += `<th class="day-column">${day}</th>`;
+    });
+
+    calendarHTML += `
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    const calendarGrid = {};
+    days.forEach(day => {
+      calendarGrid[day] = new Array(timeSlots.length).fill(null);
+    });
+
+    const assignedEntries = globalSchedule.filter(
+      entry => entry.day !== 'N/A' && entry.startSlot !== null
+    );
+
+    assignedEntries.forEach(entry => {
+      const startSlot = entry.startSlot;
+      const duration  = entry.hours || 1;
+
+      if (startSlot !== null) {
+        for (let i = 0; i < duration; i++) {
+          const slotIndex = startSlot + i;
+          if (slotIndex < timeSlots.length) {
+            if (i === 0) {
+              calendarGrid[entry.day][slotIndex] = {
+                ...entry,
+                duration,
+                isStart: true
+              };
+            } else {
+              calendarGrid[entry.day][slotIndex] = {
+                ...entry,
+                duration,
+                isStart: false,
+                isContinuation: true
+              };
+            }
+          }
+        }
+      }
+    });
+
+    timeSlots.forEach((timeSlot, timeIndex) => {
+      calendarHTML += `
+        <tr class="calendar-row" data-time-index="${timeIndex}">
+          <td class="time-cell">${timeSlot.label}</td>
+      `;
+      days.forEach(day => {
+        const cellData = calendarGrid[day][timeIndex];
+        if (cellData && cellData.isStart) {
+          const bgColor = cellData.color || getSubjectColor(cellData.subjectCode);
+          const textColor = getTextColor(bgColor);
+          const subjectName = cellData.name || cellData.subject.split(' - ')[1] || '';
+          calendarHTML += `
+            <td class="schedule-cell occupied"
+                rowspan="${cellData.duration}"
+                style="background-color: ${bgColor}; color: ${textColor};"
+                data-subject="${cellData.subjectCode || ''}"
+                data-subjectname="${cellData.subject || ''}"
+                data-teacher="${cellData.lecturer || ''}"
+                data-day="${day || ''}"
+                data-time="${cellData.timeRange || timeSlot.label || ''}">
+              <div class="event-content">
+                <div class="subject-code"><strong>${cellData.subjectCode}</strong></div>
+                <div class="subject-name">${subjectName}</div>
+                <div class="teacher-name">👨‍🏫 ${cellData.lecturer}</div>
+                <div class="time-duration">⏰ ${cellData.timeRange}</div>
+                <div class="delivery-mode">📍 ${cellData.mode}</div>
+              </div>
+            </td>`;
+        } else if (cellData && cellData.isContinuation) {
+          // skip (rowspan)
+        } else {
+          calendarHTML += `
+            <td class="schedule-cell empty"
+                data-day="${day}"
+                data-time-index="${timeIndex}"
+                data-time="${timeSlot.label}">
+              <div class="empty-slot">Available</div>
+            </td>`;
+        }
+      });
+      calendarHTML += '</tr>';
+    });
+
+    calendarHTML += `
+        </tbody>
+      </table>
+    `;
+
+    const unassignedEntries = globalSchedule.filter(entry => entry.day === 'N/A');
+    if (unassignedEntries.length > 0) {
+      calendarHTML += `
+        <div class="unassigned-courses mt-4">
+          <h6>⚠️ Unassigned Courses</h6>
+          <div class="alert alert-warning">
+            <p>The following courses could not be scheduled due to conflicts or constraints:</p>
+            <ul class="mb-0">
+      `;
+      unassignedEntries.forEach(entry => {
+        const subjectName = entry.name || entry.subject.split(' - ')[1] || '';
+        calendarHTML += `
+          <li><strong>${entry.subjectCode}</strong> - ${subjectName}
+          (${entry.hours} hours, Teacher: ${entry.lecturer})</li>`;
+      });
+      calendarHTML += `
+            </ul>
+            <p class="mt-2 mb-0">
+              <small>Try adjusting teacher availability, reducing course hours, or adding more teachers.</small>
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    const totalAssigned   = assignedEntries.length;
+    const totalUnassigned = unassignedEntries.length;
+    const totalCourses    = globalSchedule.length;
+
+    calendarHTML += `
+      <div class="schedule-stats mt-3">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="stat-card">
+              <div class="stat-number">${totalCourses}</div>
+              <div class="stat-label">Total Courses</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card success">
+              <div class="stat-number">${totalAssigned}</div>
+              <div class="stat-label">Assigned</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card ${totalUnassigned > 0 ? 'warning' : 'success'}">
+              <div class="stat-number">${totalUnassigned}</div>
+              <div class="stat-label">Unassigned</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card info">
+              <div class="stat-number">${
+                totalCourses ? Math.round((totalAssigned / totalCourses) * 100) : 0
+              }%</div>
+              <div class="stat-label">Success Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    calTable.outerHTML = calendarHTML;
+    addCalendarEventListeners();
+    calendarSection.hidden = globalSchedule.length === 0;
+  }
+
+  function getTextColor(backgroundColor) {
+    const color = backgroundColor.replace('#', '');
+    const r = parseInt(color.substr(0, 2), 16);
+    const g = parseInt(color.substr(2, 2), 16);
+    const b = parseInt(color.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#333' : '#fff';
+  }
+
+  function addCalendarEventListeners() {
+    document.querySelectorAll('.schedule-cell.occupied').forEach(cell => {
+      cell.addEventListener('mouseenter', function () {
+        this.style.transform = 'scale(1.02)';
+        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        this.style.zIndex = '10';
+      });
+      cell.addEventListener('mouseleave', function () {
+        this.style.transform = 'scale(1)';
+        this.style.boxShadow = 'none';
+        this.style.zIndex = 'auto';
+      });
+      cell.addEventListener('click', function () {
+        const subject = this.dataset.subject || 'N/A';
+        const teacher = this.dataset.teacher ?? 'Unassigned';
+        const day     = this.dataset.day || 'N/A';
+        const time    = this.dataset.time || 'N/A';
+
+        alert(
+          'Course Details:\n' +
+          `Subject: ${subject}\n` +
+          `Teacher: ${teacher}\n` +
+          `Day: ${day}\n` +
+          `Time: ${time}`
+        );
+      });
+    });
+
+    document.querySelectorAll('.schedule-cell.empty').forEach(cell => {
+      cell.addEventListener('mouseenter', function () {
+        this.style.backgroundColor = '#f8f9fa';
+        this.querySelector('.empty-slot').textContent = 'Available Slot';
+      });
+      cell.addEventListener('mouseleave', function () {
+        this.style.backgroundColor = '';
+        this.querySelector('.empty-slot').textContent = 'Available';
+      });
+    });
+  }
+
+  // Kick everything off
+  initializeSchedule();
+
+  // ---------- PDF EXPORT ----------
+  exportBtn.addEventListener('click', async () => {
+    console.log('PDF Export button clicked');
+    const originalText = exportBtn.textContent;
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Preparing PDF...';
+    try {
+      const metadata = { ...defaultMetadata, ...metadataState, ...collectMetadata() };
+      if (!metadata.programmeName) {
+        metadata.programmeName = programmeLabel || programme;
+      }
+      metadata.generatedAt = new Date().toISOString();
+      metadata.cohortLabel = studyModeLabel || metadata.cohortLabel;
+      Object.assign(metadataState, metadata);
+
+      if (!window.SegiPdf || typeof window.SegiPdf.createTimetablePdf !== 'function') {
+        throw new Error('PDF utilities are unavailable.');
+      }
+
+      const doc = await window.SegiPdf.createTimetablePdf({
+        schedule: globalSchedule,
+        metadata,
+        programmeLabel,
+        docOptions: { unit: 'pt', format: 'a4' }
+      });
+
+      const cleanStem = (metadata.reference || metadata.programmeName || 'timetable')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'timetable';
+
+      doc.save(`${cleanStem}.pdf`);
+    } catch (error) {
+      console.error('Failed to generate PDF', error);
+      alert('Unable to generate the PDF. Please check the details and try again.');
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = originalText;
+    }
+  }); // exportBtn click
+}); // DOMContentLoaded
+
+function goBack() {
+  window.location.href = 'generate_timetable.html';
+}
+</script>
+</body>
+</html>

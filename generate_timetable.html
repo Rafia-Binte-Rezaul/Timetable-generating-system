@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Automatic Timetable System</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Main page styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Navbar + footer shared CSS -->
+  <link rel="stylesheet" href="navFooter.css">
+</head>
+
+<body id="top">
+  <!-- Navigation bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark segi-nav fixed-top">
+    <div class="container">
+
+      <!-- LOGO + BRAND -->
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <img src="logo.png" alt="SEGi logo" width="40" height="40" class="rounded">
+        <span class="fw-bold">SEGi Timetable</span>
+      </a>
+
+      <!-- MOBILE TOGGLER -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- NAV CONTENT -->
+      <div id="mainnav" class="collapse navbar-collapse">
+
+        <!-- LEFT SIDE NAV ITEMS -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="teachers.html">Teachers</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="manage_subjects.html">Manage Courses</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="generate_timetable.html">Course Selection</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="view_timetables.html">View Timetables</a>
+          </li>
+
+        </ul>
+
+        <!-- SEARCH BAR -->
+        <form class="segi-search d-none d-lg-flex me-2" role="search" onsubmit="return false;">
+          <i class="bi bi-search"></i>
+          <input class="form-control form-control-sm segi-search-input"
+                 type="search" placeholder="Search… (Ctrl+/)">
+        </form>
+
+        <!-- LOGIN BUTTON -->
+        <a class="btn btn-sm btn-outline-light rounded-pill" href="login.php">Login</a>
+
+      </div> <!-- END collapse -->
+    </div> <!-- END container -->
+  </nav>
+
+  <!-- Active Page Detection Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      const navLinks = document.querySelectorAll('.segi-nav .nav-link');
+      
+      navLinks.forEach(link => {
+        const linkPage = link.getAttribute('href');
+        if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+
+  <main class="workspace">
+    <section class="workspace-header">
+      <div>
+        <p class="workspace-eyebrow">Scheduling</p>
+        <h1>Course Selection</h1>
+        <p class="workspace-subtitle">
+          Select the programmes and courses to include in the next timetable run.
+          Adjust teaching mode and session type before you generate.
+        </p>
+      </div>
+      <div class="workspace-actions">
+        <button type="button" class="btn-outline" onclick="window.location.href='manage_subjects.html'">
+          Manage Courses
+        </button>
+      </div>
+    </section>
+
+    <section class="surface-card">
+      <div class="section-heading">
+        <h2>Pick a programme</h2>
+        <p>
+          Choose the department first, then narrow down to the specific programme you are preparing.
+          Selections persist for convenience.
+        </p>
+      </div>
+      <div class="form-grid two-column">
+        <div>
+          <label for="deptSelect">Department</label>
+          <select id="deptSelect">
+            <option value="">-- Select Department --</option>
+          </select>
+        </div>
+        <div>
+          <label for="progSelect">Programme</label>
+          <select id="progSelect">
+            <option value="">-- Select Programme --</option>
+          </select>
+        </div>
+        <div>
+          <label for="studyModeSelect">Cohort</label>
+          <select id="studyModeSelect">
+            <option value="full-time">Full-Time</option>
+            <option value="part-time">Part-Time</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="surface-card">
+      <div class="section-heading">
+        <h2>Available courses</h2>
+        <p>
+          Tick the sessions you want to schedule. Fine-tune whether each slot is a lecture or tutorial
+          and confirm the delivery mode.
+        </p>
+      </div>
+      <div id="subject-list"></div>
+      <div class="form-actions">
+        <button id="generateBtn" class="btn-generate" onclick="generate()">Generate Timetable</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer-segi">
+    <div class="container">
+      <div class="row g-4 align-items-start">
+
+        <!-- Brand Column -->
+        <div class="col-md-5">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <img src="logo.png" width="40" height="40" class="rounded" alt="SEGi mark">
+            <span class="brand h6 mb-0">SEGi Timetable</span>
+          </div>
+          <p class="small text-muted mb-0">
+            Timetable Management System prototype for SEGi College Kuala Lumpur.
+            Generate and publish clash-free schedules.
+          </p>
+        </div>
+
+        <!-- Quick Links Column -->
+        <div class="col-md-4 col-lg-3">
+          <h6 class="mb-2">Quick Links</h6>
+          <ul class="list-unstyled small mb-0">
+            <li><a class="footer-link" href="view_timetables.html">Timetable</a></li>
+            <li><a class="footer-link" href="generate_timetable.html">Generator</a></li>
+            <li><a class="footer-link" href="schedule.html">Reports</a></li>
+            <li><a class="footer-link" href="index.html">Documentation</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact Column -->
+        <div class="col-md-3">
+          <h6 class="mb-2">Contact</h6>
+          <ul class="list-unstyled small mb-3">
+            <li><i class="bi bi-geo-alt me-2"></i>SEGi College Kuala Lumpur</li>
+            <li><i class="bi bi-envelope me-2"></i>it-projects@segi.edu.my</li>
+          </ul>
+
+          <div class="d-flex align-items-center justify-content-start gap-2 social-links">
+            <a aria-label="Facebook" href="#"><i class="bi bi-facebook"></i></a>
+            <a aria-label="Instagram" href="#"><i class="bi bi-instagram"></i></a>
+            <a aria-label="LinkedIn" href="#"><i class="bi bi-linkedin"></i></a>
+            <a aria-label="YouTube" href="#"><i class="bi bi-youtube"></i></a>
+            <a aria-label="X (Twitter)" href="#"><i class="bi bi-twitter-x"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center small py-2 gap-2">
+        <div>© 2025 SEGi College Kuala Lumpur — Time Table Generator</div>
+        <div class="d-flex align-items-center gap-3">
+          <a href="#top" class="back-to-top">Back to top</a>
+          <span class="text-muted">Developed by Internship Team • Prototype UI</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="scripts.js"></script>
+  <script>
+  /* ===========================================================
+     STATE + UTILITIES
+  =========================================================== */
+
+  // --- CLEAN ALL PREVIOUS COURSE SELECTION DATA ---
+  
+
+  let departmentProgrammes = {};
+  let subjectCatalog = {};
+
+  
+
+  let teacherDirectory = [];
+
+  const escapeHtml = value => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  const deptSelect   = document.getElementById('deptSelect');
+  const progSelect   = document.getElementById('progSelect');
+  const cohortSelect = document.getElementById('studyModeSelect');
+  const subjectListDiv = document.getElementById('subject-list');
+
+  // helper: add hours to a HH:MM (24h) string
+  function addHoursToTime24(timeStr, hours) {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return '';
+    let h = parseInt(parts[0], 10);
+    let m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return '';
+    let totalMinutes = h * 60 + m + (hours * 60);
+    const dayMinutes = 24 * 60;
+    totalMinutes = ((totalMinutes % dayMinutes) + dayMinutes) % dayMinutes;
+    const endH = Math.floor(totalMinutes / 60);
+    const endM = totalMinutes % 60;
+    return String(endH).padStart(2,'0') + ':' + String(endM).padStart(2,'0');
+  }
+
+  /* ===========================================================
+     API SECTION
+  =========================================================== */
+
+  async function loadDepartments() {
+    try {
+      const response = await fetch('api/programme_data.php?action=departments');
+      const result = await response.json();
+      return result.success ? result.data : [];
+    } catch (err) {
+      console.error("Dept load error:", err);
+      return [];
+    }
+  }
+
+  async function loadProgrammes(deptCode) {
+    try {
+      const response = await fetch(
+        `api/programme_data.php?action=programmes&department=${encodeURIComponent(deptCode)}`
+      );
+      const result = await response.json();
+      return result.success ? result.data : [];
+    } catch (err) {
+      console.error('Programme load error:', err);
+      return [];
+    }
+  }
+
+  async function loadSubjects(programmeId) {
+  try {
+    const response = await fetch(
+      `api/manage_subjects.php?programme_id=${encodeURIComponent(programmeId)}`
+    );
+    const json = await response.json();
+    return json.success ? json.data : [];
+  } catch (error) {
+    console.error("Subject load error:", error);
+    return [];
+  }
+}
+
+  async function loadTeachers() {
+    try {
+      const response = await fetch('api/teachers.php');
+      const teachers = await response.json();
+      teacherDirectory = Array.isArray(teachers) ? teachers : [];
+    } catch (error) {
+      console.error('Teacher load error:', error);
+      teacherDirectory = [];
+    }
+  }
+
+  async function loadPreviousSelections(programme, cohort) {
+    if (!programme) return null;
+    try {
+      const response = await fetch(
+        `api/course_selections.php?action=selections&programme=${programme}&cohort=${cohort}`
+      );
+      const result = await response.json();
+      return (result.success && result.data) ? result.data.selections : null;
+    } catch (err) {
+      console.error('Previous selections load error:', err);
+      return null;
+    }
+  }
+
+  /* Apply saved selections back into the table */
+  function applyPreviousSelections(selections) {
+    if (!Array.isArray(selections)) return;
+
+    selections.forEach(selection => {
+      const checkbox = document.querySelector(
+        `#subject-list input[type="checkbox"][value="${selection.identifier}"]`
+      );
+      if (!checkbox) return;
+
+      checkbox.checked = true;
+      const row = checkbox.closest('tr');
+      if (!row) return;
+
+      const crossSelect = row.querySelector('.cross-select');
+      if (crossSelect && selection.crossTeaching) {
+        crossSelect.value = 'yes';
+      }
+
+      const modeStandardSel    = row.querySelector('.mode-select-main');
+      const teacherStandardSel = row.querySelector('.teacher-select-main');
+
+      if (!selection.crossTeaching) {
+        if (modeStandardSel && selection.mode) modeStandardSel.value = selection.mode;
+        if (teacherStandardSel && (selection.teacher || selection.preferredTeacher)) {
+          teacherStandardSel.value = selection.teacher || selection.preferredTeacher;
+        }
+        return;
+      }
+
+      // Cross teaching: lecture/tutorial
+      const lectureHoursInput   = row.querySelector('.lecture-duration');
+      const tutorialHoursInput  = row.querySelector('.tutorial-duration');
+      const lectureModeSel      = row.querySelector('.mode-select-lecture');
+      const tutorialModeSel     = row.querySelector('.mode-select-tutorial');
+      const lectureTeacherInput = row.querySelector('.teacher-input-lecture');
+      const tutorialTeacherSel  = row.querySelector('.teacher-select-tutorial');
+      const lectureDateInput    = row.querySelector('.lecture-date');
+      const lectureStartInput   = row.querySelector('.lecture-time-start');
+      const lectureEndInput     = row.querySelector('.lecture-time-end');
+
+      if (selection.sessionVariant === 'lecture') {
+        if (lectureHoursInput && selection.durationHours) {
+          lectureHoursInput.value = selection.durationHours;
+        }
+        if (lectureModeSel && selection.mode) {
+          lectureModeSel.value = selection.mode;
+          lectureModeSel.dataset.touched = 'true';
+        }
+        if (lectureTeacherInput && (selection.teacher || selection.preferredTeacher)) {
+          lectureTeacherInput.value = selection.teacher || selection.preferredTeacher;
+          lectureTeacherInput.dataset.touched = 'true';
+        }
+        if (lectureDateInput && selection.lectureDate) {
+          lectureDateInput.value = selection.lectureDate;
+        }
+        if (lectureStartInput && selection.lectureStartTime) {
+          lectureStartInput.value = selection.lectureStartTime;
+        }
+        if (lectureEndInput && selection.lectureEndTime) {
+          lectureEndInput.value = selection.lectureEndTime;
+        }
+      }
+
+      if (selection.sessionVariant === 'tutorial') {
+        if (tutorialHoursInput && selection.durationHours) {
+          tutorialHoursInput.value = selection.durationHours;
+        }
+        if (tutorialModeSel && selection.mode) {
+          tutorialModeSel.value = selection.mode;
+          tutorialModeSel.dataset.touched = 'true';
+        }
+        if (tutorialTeacherSel && (selection.teacher || selection.preferredTeacher)) {
+          tutorialTeacherSel.value = selection.teacher || selection.preferredTeacher;
+          tutorialTeacherSel.dataset.touched = 'true';
+        }
+      }
+    });
+  }
+
+  /* ===========================================================
+     MERGE SUBJECTS BY NAME (NEW + OLD CODE)
+  =========================================================== */
+  function mergeSubjectsByName(list) {
+    const map = {};
+
+    list.forEach(item => {
+      if (!item || !item.name) return;
+      const key = item.name.trim().toLowerCase(); // match by NAME ONLY
+
+      if (!map[key]) {
+        map[key] = {
+          name: item.name,
+          newCode: "",
+          legacyCode: "",
+          hours: item.hours || item.credit_hours || 3
+        };
+      }
+
+      // Assign NEW CODE if exists
+      if (item.newCode || item.code || item.code_new) {
+        map[key].newCode = item.newCode || item.code_new || item.code;
+      }
+
+      // Assign OLD CODE if exists
+      if (item.legacyCode || item.legacy_code) {
+        map[key].legacyCode = item.legacyCode || item.legacy_code;
+      }
+    });
+
+    return Object.values(map);
+  }
+
+  /* ===========================================================
+     UI SETUP
+  =========================================================== */
+  async function populateDepartmentOptions() {
+    deptSelect.innerHTML = `<option value="">-- Select Department --</option>`;
+    const departments = await loadDepartments();
+
+    departments.forEach(dept => {
+      const opt = document.createElement("option");
+      opt.value = dept.code;
+      opt.textContent = `${dept.code} - ${dept.name}`;
+      deptSelect.appendChild(opt);
+    });
+  }
+
+  async function updateProgrammeOptions() {
+    const dept = deptSelect.value;
+    progSelect.innerHTML = `<option value="">Loading...</option>`;
+
+    if (!dept) {
+      progSelect.innerHTML = `<option value="">-- Select Programme --</option>`;
+      subjectListDiv.innerHTML = '';
+      return;
+    }
+
+    const programmes = await loadProgrammes(dept);
+    progSelect.innerHTML = `<option value="">-- Select Programme --</option>`;
+
+    programmes.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;   // using programme ID
+      opt.textContent = `${p.code} - ${p.name}`;
+      progSelect.appendChild(opt);
+    });
+
+    subjectListDiv.innerHTML = '';
+    localStorage.setItem('subjectSelectionDepartment', dept);
+  }
+
+  deptSelect.addEventListener('change', updateProgrammeOptions);
+
+  /* ===========================================================
+     SUBJECT TABLE RENDER WITH CROSS TEACHING UI
+  =========================================================== */
+  async function renderSubjectList() {
+    const programmeId = progSelect.value;
+    subjectListDiv.innerHTML = '';
+
+    if (!programmeId) {
+      subjectListDiv.innerHTML = `<div class="info-banner">Select a programme above to view its course list and pick sessions.</div>`;
+      return;
+    }
+
+    subjectListDiv.innerHTML = `<div class="info-banner">Loading courses...</div>`;
+
+    if (!teacherDirectory.length) await loadTeachers();
+
+    // Load raw subjects from DB (or cache)
+    let source = subjectCatalog[programmeId] || await loadSubjects(programmeId);
+    subjectCatalog[programmeId] = source;
+
+    // Override with custom subjects if present
+    
+
+    if (!source || !source.length) {
+      subjectListDiv.innerHTML =
+        `<div class="info-banner">No courses available for this programme. Use the Manage Courses page to add courses.</div>`;
+      return;
+    }
+
+    // Normalise before merging (so DB snake_case also works)
+    const normalised = source.map(sub => ({
+    name: sub.name || sub.course_name || '',
+    newCode: sub.new_code || sub.newCode || sub.code || '',
+    legacyCode: sub.legacy_code || sub.legacyCode || '',
+    code: sub.code || '',
+    hours: sub.credit_hours || sub.hours || 3
+  }));
+
+
+    // 🔁 Merge by subject name
+    const mergedList = mergeSubjectsByName(normalised);
+
+    const subjects = mergedList.map(sub => {
+      const identifier = sub.newCode || sub.legacyCode || sub.name;
+      return {
+        name: sub.name,
+        newCode: sub.newCode,
+        legacyCode: sub.legacyCode,
+        identifier,
+        hours: sub.hours
+      };
+    });
+
+    const modeOptions = ['Offline','Online'];
+
+    const renderModeSelect = (className, selectedValue) => {
+      const safeValue = selectedValue || 'Offline';
+      const optionsHtml = modeOptions.map(option =>
+        `<option value="${option}" ${option === safeValue ? 'selected' : ''}>${option}</option>`
+      ).join('');
+      return `<select class="mode-select ${className}">${optionsHtml}</select>`;
+    };
+
+    const renderTeacherSelect = className => {
+      if (!teacherDirectory.length) {
+        return `<select class="teacher-select ${className}" disabled><option value="">No teachers available</option></select>`;
+      }
+      const options = ['<option value="">Select lecturer</option>'].concat(
+        teacherDirectory.map(t =>
+          `<option value="${escapeHtml(t.name || '')}">${escapeHtml(t.name || '')}</option>`
+        )
+      ).join('');
+      return `<select class="teacher-select ${className}">${options}</select>`;
+    };
+
+    let html = `
+      <table class="course-selection-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>New Code</th>
+            <th>Old Code</th>
+            <th>Name</th>
+            <th>Credit Hours</th>
+            <th>Cross Teaching</th>
+            <th>Delivery Mode</th>
+            <th>Teacher &amp; Time</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    subjects.forEach((sub, index) => {
+      const identifier    = sub.identifier;
+      if (!identifier) return;
+
+      const displayNew    = sub.newCode || '—';
+      const displayLegacy = sub.legacyCode || '—';
+      const numericHours  = Number.isFinite(Number(sub.hours)) ? Number(sub.hours) : 3;
+
+      const standardModeSelect    = renderModeSelect('mode-select-main', 'Offline');
+      const lectureModeSelect     = renderModeSelect('mode-select-lecture', 'Offline');
+      const tutorialModeSelect    = renderModeSelect('mode-select-tutorial', 'Offline');
+      const standardTeacherSelect = renderTeacherSelect('teacher-select-main');
+      const tutorialTeacherSelect = renderTeacherSelect('teacher-select-tutorial');
+
+      html += `<tr>` +
+  `<td><input type="checkbox" value="${identifier}" data-index="${index}" data-new-code="${displayNew === '—' ? '' : sub.newCode}" data-legacy-code="${displayLegacy === '—' ? '' : sub.legacyCode}" data-hours="${numericHours}"></td>` +
+  `<td>${displayNew}</td>` +
+  `<td>${displayLegacy}</td>` +
+  `<td>${escapeHtml(sub.name)}</td>` +
+  `<td>${sub.hours}</td>` +
+
+  /* ========= CROSS TEACHING ========= */
+  `<td>
+      <div class="cross-control">
+        <select class="cross-select" aria-label="Select cross teaching preference">
+          <option value="no" selected>Not cross teaching</option>
+          <option value="yes">Cross teaching</option>
+        </select>
+
+        <div class="duration-wrap">
+          <span class="duration-label">Sessions:</span>
+          <div class="duration-display" data-default-hours="${numericHours}" aria-live="polite"></div>
+        </div>
+
+        <div class="duration-manual is-hidden">
+          <label class="duration-field">
+            <span>Lecture hours</span>
+            <input type="number" class="duration-input lecture-duration" min="1" max="9" step="1" value="2">
+          </label>
+          <label class="duration-field">
+            <span>Tutorial hours</span>
+            <input type="number" class="duration-input tutorial-duration" min="1" max="9" step="1" value="1">
+          </label>
+        </div>
+      </div>
+    </td>` +
+
+  /* ========= MODE ========= */
+  `<td>
+      <div class="mode-standard">
+        <div class="mode-row">
+          <span class="mode-label">Mode</span>
+          ${standardModeSelect}
+        </div>
+      </div>
+
+      <div class="mode-cross is-hidden">
+        <div class="mode-row">
+          <span class="mode-label lecture-label">Lecture</span>
+          ${lectureModeSelect}
+        </div>
+        <div class="mode-row">
+          <span class="mode-label tutorial-label">Tutorial</span>
+          ${tutorialModeSelect}
+        </div>
+      </div>
+    </td>` +
+
+  /* ========= TEACHER + TIME (CLEAN WEEKLY VERSION) ========= */
+  `<td>
+      <div class="teacher-standard">
+        <div class="teacher-row">
+          <span class="teacher-label">Lecturer</span>
+          ${standardTeacherSelect}
+        </div>
+      </div>
+
+      <div class="teacher-cross is-hidden">
+
+        <!-- LECTURE ROW -->
+        <div class="teacher-row d-flex align-items-center flex-wrap gap-3">
+
+          <!-- LABEL -->
+          <span class="teacher-label">Lecture</span>
+
+          <!-- NAME -->
+          <input type="text" class="form-control form-control-sm teacher-input-lecture"
+                 placeholder="Type lecturer name">
+
+          <!-- DAY -->
+          <div>
+            <span class="teacher-label small d-block">Day</span>
+            <select class="form-select form-select-sm tt-day">
+              <option value="">Select</option>
+              <option>Monday</option>
+              <option>Tuesday</option>
+              <option>Wednesday</option>
+              <option>Thursday</option>
+              <option>Friday</option>
+              <option>Saturday</option>
+              <option>Sunday</option>
+            </select>
+          </div>
+
+          <!-- TIME -->
+          <div class="d-flex align-items-center flex-wrap gap-1 lecture-time-inline">
+            <span class="teacher-label small">Time</span>
+            <input type="time" class="form-control form-control-sm lecture-time-start">
+            <span class="time-separator">–</span>
+            <input type="time" class="form-control form-control-sm lecture-time-end" readonly>
+          </div>
+
+        </div>
+
+        <!-- TUTORIAL TEACHER -->
+        <div class="teacher-row mt-2">
+          <span class="teacher-label">Tutorial</span>
+          ${tutorialTeacherSelect}
+        </div>
+
+      </div>
+    </td>` +
+
+  `</tr>`;
+
+    });
+
+    html += '</tbody></table>';
+    subjectListDiv.innerHTML = '<div class="table-wrap">' + html + '</div>';
+
+    const helper = document.createElement('p');
+    helper.className = 'cross-note';
+    helper.textContent = 'Enable "Cross teaching" to split this course into lecture and tutorial sessions, customise the hours for each, assign lecturers, and choose separate delivery modes. For cross teaching, you can also type an external lecture name and start time — the end time will be calculated automatically.';
+    subjectListDiv.appendChild(helper);
+
+    // Load and apply previous selections
+    // const cohort = cohortSelect ? cohortSelect.value || 'full-time' : 'full-time';
+    // const previousSelections = await loadPreviousSelections(programmeId, cohort);
+    // if (previousSelections) {
+    //   applyPreviousSelections(previousSelections);
+    // }
+
+    // Persist programme selection
+
+    const table = subjectListDiv.querySelector('table');
+    if (table) {
+      attachCrossTeachingHandlers(table);
+    }
+  }
+
+  progSelect.addEventListener("change", renderSubjectList);
+
+  /* ===========================================================
+     CROSS TEACHING INTERACTION HANDLERS
+  =========================================================== */
+  function attachCrossTeachingHandlers(tableEl) {
+    const rows = tableEl.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const crossSelect          = row.querySelector('.cross-select');
+      const durationWrap         = row.querySelector('.duration-wrap');
+      const durationDisplay      = row.querySelector('.duration-display');
+      const durationManual       = row.querySelector('.duration-manual');
+      const lectureInput         = row.querySelector('.lecture-duration');
+      const tutorialInput        = row.querySelector('.tutorial-duration');
+      const checkbox             = row.querySelector('input[type="checkbox"]');
+      const standardWrapper      = row.querySelector('.mode-standard');
+      const crossWrapper         = row.querySelector('.mode-cross');
+      const standardSelect       = row.querySelector('.mode-select-main');
+      const lectureSelect        = row.querySelector('.mode-select-lecture');
+      const tutorialSelect       = row.querySelector('.mode-select-tutorial');
+      const teacherStandardWrapper = row.querySelector('.teacher-standard');
+      const teacherCrossWrapper    = row.querySelector('.teacher-cross');
+      const teacherStandardSelect  = row.querySelector('.teacher-select-main');
+      const lectureTeacherInput    = row.querySelector('.teacher-input-lecture');
+      const teacherTutorialSelect  = row.querySelector('.teacher-select-tutorial');
+      const lectureStartInput      = row.querySelector('.lecture-time-start');
+      const lectureEndInput        = row.querySelector('.lecture-time-end');
+
+      const defaultHours = checkbox
+        ? Math.max(1, Math.round(Number(checkbox.getAttribute('data-hours')) || 3))
+        : 3;
+
+      const buildStandardChip = hours => {
+        const safeHours = Math.max(1, hours);
+        return `<span class="session-chip">Lecture · ${safeHours} hour${safeHours === 1 ? '' : 's'}</span>`;
+      };
+
+      const markTouchedSelect = el => {
+        if (!el) return;
+        el.addEventListener('change', () => {
+          el.dataset.touched = 'true';
+        });
+      };
+
+      const markTouchedInput = el => {
+        if (!el) return;
+        el.addEventListener('input', () => {
+          el.dataset.touched = 'true';
+        });
+      };
+
+      markTouchedSelect(lectureSelect);
+      markTouchedSelect(tutorialSelect);
+      markTouchedSelect(teacherTutorialSelect);
+      markTouchedSelect(teacherStandardSelect);
+      markTouchedInput(lectureTeacherInput);
+
+      const clampHours = (value, fallback) => {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return fallback;
+        if (numeric < 1) return 1;
+        if (numeric > 9) return 9;
+        return Math.round(numeric);
+      };
+
+      const updateLectureEnd = () => {
+        if (!lectureStartInput || !lectureEndInput) return;
+        const startVal = lectureStartInput.value;
+        if (!startVal) {
+          lectureEndInput.value = '';
+          return;
+        }
+        const hours = lectureInput ? clampHours(lectureInput.value, 2) : defaultHours;
+        const endVal = addHoursToTime24(startVal, hours);
+        lectureEndInput.value = endVal || '';
+      };
+
+      const syncManualInputs = () => {
+        const lectureHours  = lectureInput  ? clampHours(lectureInput.value, 2) : 2;
+        const tutorialHours = tutorialInput ? clampHours(tutorialInput.value, 1) : 1;
+        if (lectureInput)  lectureInput.value  = lectureHours;
+        if (tutorialInput) tutorialInput.value = tutorialHours;
+        updateLectureEnd();
+      };
+
+      const syncState = () => {
+        if (!durationDisplay) return;
+        const isCross = crossSelect && crossSelect.value === 'yes';
+
+        if (isCross) {
+          durationDisplay.innerHTML = '';
+          durationDisplay.classList.add('is-hidden');
+          if (durationWrap) durationWrap.classList.add('is-hidden');
+          if (standardWrapper) standardWrapper.classList.add('is-hidden');
+          if (crossWrapper) crossWrapper.classList.remove('is-hidden');
+          if (teacherStandardWrapper) teacherStandardWrapper.classList.add('is-hidden');
+          if (teacherCrossWrapper) teacherCrossWrapper.classList.remove('is-hidden');
+          if (durationManual) durationManual.classList.remove('is-hidden');
+
+          // propagate standard selections into lecture/tutorial if not touched
+          if (standardSelect && lectureSelect && !lectureSelect.dataset.touched) {
+            lectureSelect.value = standardSelect.value;
+          }
+          if (standardSelect && tutorialSelect && !tutorialSelect.dataset.touched) {
+            tutorialSelect.value = standardSelect.value;
+          }
+          if (teacherStandardSelect && lectureTeacherInput && !lectureTeacherInput.dataset.touched) {
+            lectureTeacherInput.value = teacherStandardSelect.value || '';
+          }
+          if (teacherStandardSelect && teacherTutorialSelect && !teacherTutorialSelect.dataset.touched) {
+            teacherTutorialSelect.value = teacherStandardSelect.value;
+          }
+          syncManualInputs();
+        } else {
+          durationDisplay.innerHTML = buildStandardChip(defaultHours);
+          durationDisplay.classList.remove('is-hidden');
+          if (durationWrap) durationWrap.classList.remove('is-hidden');
+          if (standardWrapper) standardWrapper.classList.remove('is-hidden');
+          if (crossWrapper) crossWrapper.classList.add('is-hidden');
+          if (teacherStandardWrapper) teacherStandardWrapper.classList.remove('is-hidden');
+          if (teacherCrossWrapper) teacherCrossWrapper.classList.add('is-hidden');
+          if (durationManual) durationManual.classList.add('is-hidden');
+
+          // if tutorial teacher changed and we go back to standard, copy tutorial to dropdown
+          if (teacherStandardSelect &&
+              teacherTutorialSelect &&
+              teacherTutorialSelect.dataset.touched &&
+              teacherTutorialSelect.value) {
+            teacherStandardSelect.value = teacherTutorialSelect.value;
+          }
+        }
+      };
+
+      if (lectureInput) {
+        lectureInput.addEventListener('input', syncManualInputs);
+        lectureInput.addEventListener('blur', syncManualInputs);
+      }
+      if (tutorialInput) {
+        tutorialInput.addEventListener('input', syncManualInputs);
+        tutorialInput.addEventListener('blur', syncManualInputs);
+      }
+      if (crossSelect) {
+        crossSelect.addEventListener('change', syncState);
+      }
+      if (lectureStartInput) {
+        lectureStartInput.addEventListener('input', updateLectureEnd);
+        lectureStartInput.addEventListener('change', updateLectureEnd);
+      }
+
+      // initial state
+      syncState();
+    });
+  }
+
+
+  /* ===========================================================
+     GENERATE FUNCTION (CROSS-TEACHING + MANUAL LECTURE TIME)
+  =========================================================== */
+  function generate() {
+    const programme = progSelect.value;
+    const cohort = cohortSelect ? (cohortSelect.value || 'full-time') : 'full-time';
+
+    if (!programme) {
+      alert("Please select a programme.");
+      return;
+    }
+
+    const rows = document.querySelectorAll("#subject-list tbody tr");
+    const selectedCourses = [];
+    const invalidDurations = [];
+
+    rows.forEach(row => {
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      if (!checkbox || !checkbox.checked) return;
+
+      const identifier = checkbox.value;
+      const newCode = checkbox.getAttribute('data-new-code') || '';
+      const legacyCode = checkbox.getAttribute('data-legacy-code') || '';
+      const code = newCode || legacyCode || identifier;
+
+      const crossSel            = row.querySelector('.cross-select');
+      const modeStandardSel     = row.querySelector('.mode-select-main');
+      const lectureModeSel      = row.querySelector('.mode-select-lecture');
+      const tutorialModeSel     = row.querySelector('.mode-select-tutorial');
+      const teacherStandardSel  = row.querySelector('.teacher-select-main');
+      const lectureTeacherInput = row.querySelector('.teacher-input-lecture');
+      const teacherTutorialSel  = row.querySelector('.teacher-select-tutorial');
+      const lectureDateInput    = row.querySelector('.lecture-date');
+      const lectureStartInput   = row.querySelector('.lecture-time-start');
+      const lectureEndInput     = row.querySelector('.lecture-time-end');
+
+      const modeStandardValue    = modeStandardSel ? modeStandardSel.value : 'Offline';
+      const teacherStandardValue = teacherStandardSel ? teacherStandardSel.value : '';
+      const crossTeaching        = crossSel ? crossSel.value === 'yes' : false;
+
+      const defaultHours = Math.max(1, Math.round(Number(checkbox.getAttribute('data-hours')) || 3));
+
+      // SUBJECT NAME from 4th column
+      const rowName = row.querySelector('td:nth-child(4)').textContent.trim();
+
+      const baseCourse = {
+        identifier,
+        code,
+        newCode,
+        legacyCode,
+        name: rowName,
+        subjectName: rowName,
+        studyMode: cohort
+      };
+
+      /* ===========================================================
+         CROSS TEACHING
+      ============================================================ */
+      if (crossTeaching) {
+        const lectureDurationInput  = row.querySelector('.lecture-duration');
+        const tutorialDurationInput = row.querySelector('.tutorial-duration');
+
+        const parseDuration = (input, fallback) => {
+          if (!input) return fallback;
+          const numeric = Number(input.value);
+          if (!Number.isFinite(numeric)) return null;
+          let clamped = Math.round(numeric);
+          if (clamped < 1) clamped = 1;
+          if (clamped > 9) clamped = 9;
+          input.value = clamped;
+          return clamped;
+        };
+
+        const lectureHours  = parseDuration(lectureDurationInput, 2);
+        const tutorialHours = parseDuration(tutorialDurationInput, 1);
+
+        if (lectureHours === null || tutorialHours === null) {
+          invalidDurations.push(code);
+          return;
+        }
+
+        const lectureMode   = lectureModeSel ? lectureModeSel.value : modeStandardValue;
+        const tutorialMode  = tutorialModeSel ? tutorialModeSel.value : lectureMode;
+        const lectureTeacher = lectureTeacherInput
+          ? lectureTeacherInput.value.trim()
+          : teacherStandardValue;
+        const tutorialTeacher = teacherTutorialSel
+          ? teacherTutorialSel.value
+          : teacherStandardValue;
+
+        const lectureDate = lectureDateInput ? lectureDateInput.value : '';
+        const lectureStartTimeRaw = lectureStartInput ? lectureStartInput.value : '';
+        let lectureEndTimeRaw = lectureEndInput ? lectureEndInput.value : '';
+
+        if (lectureStartTimeRaw && !lectureEndTimeRaw) {
+          lectureEndTimeRaw = addHoursToTime24(lectureStartTimeRaw, lectureHours);
+        }
+
+        const manualLecture = Boolean(lectureDate && lectureStartTimeRaw);
+
+        // ------------------- Lecture Entry (may be manual external) -------------------
+        selectedCourses.push({
+          ...baseCourse,
+          crossTeaching: true,
+          sessionVariant: "lecture",
+          type: "Lecture",
+          durationHours: lectureHours,
+          mode: lectureMode,
+
+          preferredTeacher: lectureTeacher,
+          teacherLecture: lectureTeacher,
+          teacherStandard: lectureTeacher,
+
+          lectureDate: lectureDate || null,
+          lectureStartTime: lectureStartTimeRaw || null,
+          lectureEndTime: lectureEndTimeRaw || null,
+          manualLecture,
+
+          sessionLabel: manualLecture
+            ? `Cross Teaching Lecture (External · ${lectureHours} hour${lectureHours === 1 ? '' : 's'})`
+            : `Cross Teaching Lecture (${lectureHours} hour${lectureHours === 1 ? '' : 's'})`
+        });
+
+        // ------------------- Tutorial Entry (normal teacher, auto schedule) ---------
+        selectedCourses.push({
+          ...baseCourse,
+          crossTeaching: true,
+          sessionVariant: "tutorial",
+          type: "Tutorial",
+          durationHours: tutorialHours,
+          mode: tutorialMode,
+
+          preferredTeacher: tutorialTeacher,
+          teacherTutorial: tutorialTeacher,
+          teacherStandard: tutorialTeacher,
+
+          sessionLabel: `Cross Teaching Tutorial (${tutorialHours} hour${tutorialHours === 1 ? '' : 's'})`
+        });
+
+      } 
+      /* ===========================================================
+         STANDARD TEACHING (not cross)
+      ============================================================ */
+      else {
+        selectedCourses.push({
+          ...baseCourse,
+          crossTeaching: false,
+          sessionVariant: "standard",
+          type: "Standard",
+          durationHours: defaultHours,
+          mode: modeStandardValue,
+
+          preferredTeacher: teacherStandardValue,
+          teacherStandard: teacherStandardValue,
+
+          sessionLabel: `Standard Session (${defaultHours} hour${defaultHours === 1 ? '' : 's'})`
+        });
+      }
+    });
+
+    if (invalidDurations.length) {
+      alert(`Please provide valid numerical hours for: ${invalidDurations.join(', ')}`);
+      return;
+    }
+
+    if (!selectedCourses.length) {
+      alert("Please select at least one course.");
+      return;
+    }
+
+    
+
+    // Save to database
+    const selectionData = {
+      programme: programme,
+      cohort: cohort,
+      selections: selectedCourses
+    };
+
+    fetch("api/course_selections.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selectionData)
+    })
+    .then(r => r.json())
+    .then(res => {
+      console.log('Course selections saved:', res);
+      window.location.href = "schedule.html";
+    })
+    .catch(err => {
+      console.error('Error saving course selections:', err);
+      window.location.href = "schedule.html";
+    });
+  }
+
+
+  /* ===========================================================
+     PAGE INIT
+  ============================================================ */
+  document.addEventListener("DOMContentLoaded", () => {
+    populateDepartmentOptions();
+    loadTeachers();
+
+    
+  });
+  </script>
+</body>
+</html>

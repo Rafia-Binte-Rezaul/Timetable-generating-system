@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Automatic Timetable System</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="navFooter.css">
+
+  <!-- PDF Libraries (for SEGi PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+  <!-- Your SEGi PDF helper (same file used in schedule.html) -->
+  <script src="pdf-utils.js"></script>
+</head>
+
+<body id="top">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark segi-nav fixed-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <!-- add class="logo" so pdf-utils can reuse the logo if needed -->
+      <img src="logo.png" width="40" height="40" class="rounded logo" alt="SEGi">
+      <span class="fw-bold">SEGi Timetable</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainnav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="mainnav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="teachers.html">Teachers</a></li>
+        <li class="nav-item"><a class="nav-link" href="manage_subjects.html">Manage Courses</a></li>
+        <li class="nav-item"><a class="nav-link" href="generate_timetable.html">Course Selection</a></li>
+        <li class="nav-item"><a class="nav-link active" href="view_timetables.html">View Timetables</a></li>
+      </ul>
+
+      <form class="segi-search d-none d-lg-flex me-2" onsubmit="return false;">
+        <i class="bi bi-search"></i>
+        <input class="form-control form-control-sm segi-search-input" placeholder="Search… (Ctrl+/)">
+      </form>
+
+      <a class="btn btn-sm btn-outline-light rounded-pill" href="login.php">Login</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- PAGE HEADER -->
+<main class="workspace">
+  <section class="workspace-header">
+    <div>
+      <p class="workspace-eyebrow">Archives</p>
+      <h1>Saved Timetables</h1>
+      <p class="workspace-subtitle">
+        Retrieve previously generated schedules for review, export, or approval.
+      </p>
+    </div>
+
+    <!-- BUTTON -->
+    <div class="workspace-actions">
+      <button class="btn-outline" onclick="window.location.href='generate_timetable.html'">Generate New</button>
+    </div>
+
+    <!-- DROPDOWNS -->
+    <div class="d-flex gap-3 mt-4 flex-wrap">
+
+      <div>
+        <label>Department</label>
+        <select id="deptSelect" class="form-select">
+          <option value="">-- Select Department --</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Programme</label>
+        <select id="progSelect" class="form-select">
+          <option value="">-- Select Programme --</option>
+        </select>
+      </div>
+
+      <div id="cohortWrapper" class="is-hidden">
+        <label>Cohort</label>
+        <select id="cohortSelect" class="form-select">
+          <option value="">-- Select Cohort --</option>
+        </select>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TIMETABLE VIEW -->
+  <section class="surface-card">
+    <div class="section-heading">
+      <h2>Timetable overview</h2>
+      <p>The latest timetable for the selected programme will appear below.</p>
+    </div>
+
+    <div id="timetableDisplay"></div>
+
+    <div class="form-actions is-hidden" id="exportActions">
+      <button id="exportBtn">Export PDF</button>
+    </div>
+  </section>
+</main>
+
+
+<footer class="footer-segi">
+  <div class="container">
+    <div class="row g-4 align-items-start">
+      
+      <!-- Brand Column -->
+      <div class="col-md-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <img src="logo.png" width="40" height="40" class="rounded" alt="SEGi mark">
+          <span class="brand h6 mb-0">SEGi Timetable</span>
+        </div>
+        <p class="small text-muted mb-0">
+          Timetable Management System prototype for SEGi College Kuala Lumpur.
+          Generate and publish clash-free schedules.
+        </p>
+      </div>
+
+      <!-- Quick Links Column -->
+      <div class="col-md-4 col-lg-3">
+        <h6 class="mb-2">Quick Links</h6>
+        <ul class="list-unstyled small mb-0">
+          <li><a class="footer-link" href="view_timetables.html">Timetable</a></li>
+          <li><a class="footer-link" href="generate_timetable.html">Generator</a></li>
+          <li><a class="footer-link" href="schedule.html">Reports</a></li>
+          <li><a class="footer-link" href="index.html">Documentation</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Column -->
+      <div class="col-md-3">
+        <h6 class="mb-2">Contact</h6>
+        <ul class="list-unstyled small mb-3">
+          <li><i class="bi bi-geo-alt me-2"></i>SEGi College Kuala Lumpur</li>
+          <li><i class="bi bi-envelope me-2"></i>it-projects@segi.edu.my</li>
+        </ul>
+
+        <div class="d-flex align-items-center justify-content-start gap-2 social-links">
+          <a aria-label="Facebook" href="#"><i class="bi bi-facebook"></i></a>
+          <a aria-label="Instagram" href="#"><i class="bi bi-instagram"></i></a>
+          <a aria-label="LinkedIn" href="#"><i class="bi bi-linkedin"></i></a>
+          <a aria-label="YouTube" href="#"><i class="bi bi-youtube"></i></a>
+          <a aria-label="X (Twitter)" href="#"><i class="bi bi-twitter-x"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center small py-2 gap-2">
+      <div>© 2025 SEGi College Kuala Lumpur — Time Table Generator</div>
+      <div class="d-flex align-items-center gap-3">
+        <a href="#top" class="back-to-top">Back to top</a>
+        <span class="text-muted">Developed by Internship Team • Prototype UI</span>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+
+<!-- Bootstrap JS (optional but good for navbar toggler) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// -------------------------------------
+// ELEMENTS
+// -------------------------------------
+const deptSelect      = document.getElementById("deptSelect");
+const progSelect      = document.getElementById("progSelect");
+const cohortSelect    = document.getElementById("cohortSelect");
+const cohortWrapper   = document.getElementById("cohortWrapper");
+const displayDiv      = document.getElementById("timetableDisplay");
+const exportActions   = document.getElementById("exportActions");
+const exportBtn       = document.getElementById("exportBtn");
+
+// will keep the last timetable loaded + study mode
+let currentTimetable  = null;
+let currentStudyMode  = "";
+const defaultViewNotes =
+  "This timetable is generated electronically and is subject to change.\n" +
+  "Refer to official notices for updated venues or lecturers.\n" +
+  "Contact the programme leader for clarification on any discrepancies.";
+
+// -------------------------------------
+// HELPERS
+// -------------------------------------
+function formatTime(value) {
+  if (!value) return "";
+  // value like "08:00:00" -> "08:00"
+  const parts = value.toString().split(":");
+  if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
+  return value;
+}
+
+// -------------------------------------
+// LOAD: Departments
+// -------------------------------------
+async function loadDepartments() {
+  const res  = await fetch("api/programme_data.php?action=departments");
+  const data = await res.json();
+  return data.success ? data.data : [];
+}
+
+// -------------------------------------
+// LOAD: Programmes by Department
+// -------------------------------------
+async function loadProgrammes(deptCode) {
+  const res  = await fetch("api/programme_data.php?action=programmes&department=" + deptCode);
+  const data = await res.json();
+  return data.success ? data.data : [];
+}
+
+// -------------------------------------
+// LOAD: Timetable (from DB)
+// -------------------------------------
+async function loadTimetable(programme, studyMode) {
+  const res  = await fetch(`api/timetables.php?programme=${programme}&studyMode=${studyMode}`);
+  const data = await res.json();
+  return data.success ? data.timetable : null;
+}
+
+// -------------------------------------
+// INIT Department Dropdown
+// -------------------------------------
+async function initDepartments() {
+  const list = await loadDepartments();
+  list.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d.code;
+    opt.textContent = `${d.code} - ${d.name}`;
+    deptSelect.appendChild(opt);
+  });
+}
+
+// -------------------------------------
+// DEPARTMENT CHANGE
+// -------------------------------------
+deptSelect.addEventListener("change", async () => {
+  const dept = deptSelect.value;
+
+  progSelect.innerHTML   = `<option value="">-- Select Programme --</option>`;
+  cohortSelect.innerHTML = `<option value="">-- Select Cohort --</option>`;
+  cohortWrapper.classList.add("is-hidden");
+  displayDiv.innerHTML   = "";
+  exportActions.classList.add("is-hidden");
+  currentTimetable = null;
+
+  if (!dept) return;
+
+  const programmes = await loadProgrammes(dept);
+  programmes.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.code;
+    opt.textContent = `${p.code} - ${p.name}`;
+    progSelect.appendChild(opt);
+  });
+});
+
+// -------------------------------------
+// PROGRAMME CHANGE
+// -------------------------------------
+progSelect.addEventListener("change", () => {
+  // Predefined study modes (cohort)
+  cohortSelect.innerHTML = `
+    <option value="">-- Select Cohort --</option>
+    <option value="Full-Time">Full-Time</option>
+    <option value="Part-Time">Part-Time</option>
+  `;
+  cohortWrapper.classList.remove("is-hidden");
+  displayDiv.innerHTML = "";
+  exportActions.classList.add("is-hidden");
+  currentTimetable = null;
+});
+
+// -------------------------------------
+// COHORT CHANGE → LOAD TIMETABLE
+// -------------------------------------
+cohortSelect.addEventListener("change", async () => {
+  const programme = progSelect.value;
+  const studyMode = cohortSelect.value;
+
+  if (!programme || !studyMode) return;
+
+  displayDiv.innerHTML = "<div class='info-banner'>Loading timetable...</div>";
+  exportActions.classList.add("is-hidden");
+  currentTimetable = null;
+  currentStudyMode = studyMode;
+
+  const timetable = await loadTimetable(programme, studyMode);
+
+  if (!timetable) {
+    displayDiv.innerHTML = "<div class='info-banner'>No timetable found.</div>";
+    return;
+  }
+
+  currentTimetable = timetable; // keep for PDF export
+  showTimetable(timetable);
+});
+
+// -------------------------------------
+// RENDER TIMETABLE ON SCREEN
+// -------------------------------------
+function showTimetable(data) {
+  const entries = data.entries || [];
+
+  if (!entries.length) {
+    displayDiv.innerHTML = "<div class='info-banner'>No entries available.</div>";
+    exportActions.classList.add("is-hidden");
+    return;
+  }
+
+  let html = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Day &amp; Time</th>
+            <th>Type</th>
+            <th>Mode</th>
+            <th>Lecturer</th>
+            <th>Venue</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  entries.forEach(e => {
+    const subject  = `${e.subject_code || ""} - ${e.subject_name || ""}`;
+    const timeText = `${formatTime(e.start_time)} - ${formatTime(e.end_time)}`;
+    html += `
+      <tr>
+        <td>${subject}</td>
+        <td>${e.day_of_week}<br>${timeText}</td>
+        <td>${e.session_type}</td>
+        <td>${e.delivery_mode}</td>
+        <td>${e.teacher_name || "TBA"}</td>
+        <td>${e.venue || (e.delivery_mode && e.delivery_mode.toLowerCase() === "online" ? "Online" : "TBA")}</td>
+      </tr>`;
+  });
+
+  html += "</tbody></table></div>";
+
+  displayDiv.innerHTML = html;
+  exportActions.classList.remove("is-hidden");
+}
+
+// -------------------------------------
+// PDF EXPORT — SEGi PROFESSIONAL DESIGN
+// -------------------------------------
+exportBtn.addEventListener("click", async () => {
+  if (
+    !currentTimetable ||
+    !currentTimetable.entries ||
+    !currentTimetable.entries.length
+  ) {
+    alert("No timetable to export.");
+    return;
+  }
+
+  if (!window.SegiPdf || typeof window.SegiPdf.createTimetablePdf !== "function") {
+    alert("PDF export engine is not available.");
+    return;
+  }
+
+  const entries = currentTimetable.entries;
+
+  // Build schedule array in the SAME SHAPE as schedule.html uses
+  const schedule = entries.map(e => ({
+    subjectCode: e.subject_code,
+    subjectName: e.subject_name,
+    programme: currentTimetable.programme_code || currentTimetable.programme_name,
+    dayTime: `${e.day_of_week} ${formatTime(e.start_time)} - ${formatTime(e.end_time)}`,
+    type: e.session_type,
+    mode: e.delivery_mode,
+    lecturer: e.teacher_name || "TBA",
+    venue: e.venue || (e.delivery_mode && e.delivery_mode.toLowerCase() === "online" ? "Online" : "TBA")
+  }));
+
+  const rawMeta = currentTimetable.metadata || {};
+  const metadata = {
+    programmeName:
+      rawMeta.programmeName ||
+      currentTimetable.programme_name ||
+      currentTimetable.programme_code ||
+      "",
+    headerTitle: "PROGRAMME TIMETABLE",
+    cohortLabel: rawMeta.cohortLabel || currentStudyMode || "",
+    session: currentTimetable.session || rawMeta.session || "",
+    academicYear: currentTimetable.academic_year || rawMeta.academicYear || "",
+    intake: rawMeta.intake || "",
+    classStart: rawMeta.classStart || "",
+    classEnd: rawMeta.classEnd || "",
+    finalExam: rawMeta.finalExam || "",
+    notes: rawMeta.notes || defaultViewNotes,
+    generatedAt: rawMeta.generatedAt || currentTimetable.created_at || ""
+  };
+
+  exportBtn.disabled = true;
+  const originalLabel = exportBtn.textContent;
+  exportBtn.textContent = "Preparing PDF...";
+
+  try {
+    const doc = await window.SegiPdf.createTimetablePdf({
+      schedule,
+      metadata,
+      programmeLabel: metadata.programmeName
+    });
+
+    const stem =
+      (metadata.programmeName || "timetable")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "timetable";
+
+    doc.save(`${stem}.pdf`);
+  } catch (err) {
+    console.error("PDF export failed", err);
+    alert("Unable to export the PDF. Please try again.");
+  } finally {
+    exportBtn.disabled = false;
+    exportBtn.textContent = originalLabel;
+  }
+});
+
+// -------------------------------------
+initDepartments();
+// -------------------------------------
+</script>
+
+</body>
+</html>
