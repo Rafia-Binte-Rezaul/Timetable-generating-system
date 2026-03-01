@@ -15,7 +15,7 @@ Courses:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/3d2e84ddb26273c68aff16e804a796f89e57e8e0/subjects.png)
 
 Course Selection Page:
-![image alt]()
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/c38e36267bbbca118d1f643324cb8d95b98df6cf/course.png)
 
 Course Selection:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/20d7f97fb0690407d38cd18a598bfa1e1d47487d/selection.png)
