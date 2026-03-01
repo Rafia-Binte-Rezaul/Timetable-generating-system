@@ -9,7 +9,17 @@ Teachers Details:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/4acaca6ac1ad5cb4eb9be5ebeee2d5c603ac12a2/teachers.png)
 
 Add Teachers:
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/9413f818ab68c7ec1e15468a335eca57a6f9d6cc/Teacher%20Details.png)
+
+Course Structure:
 ![image alt]()
+
+Course Selection Page:
+![image alt]()
+
+Course Selection:
+![image alt]()
+
 
 PDF Header:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/e7a6f31e237731cf4aff6bbdfff70fd3754414b8/pdfHeader.png)
