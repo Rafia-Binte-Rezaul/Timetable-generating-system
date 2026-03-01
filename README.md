@@ -18,7 +18,7 @@ Generated table summary:
 ![image alt]()
 
 Website Footer:
-![image alt]()
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/5701fea055fe0dbd13b0d6da1b05764f0a745980/homepage2.png)
 
 This project integrates the SEGi Timetable System with a MySQL database using PHP and phpMyAdmin.
 
