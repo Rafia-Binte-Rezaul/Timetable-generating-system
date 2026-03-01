@@ -12,7 +12,7 @@ Add Teachers:
 ![image alt]()
 
 PDF Header:
-![image alt]()
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/e7a6f31e237731cf4aff6bbdfff70fd3754414b8/pdfHeader.png)
 
 Generated table summary:
 ![image alt]()
