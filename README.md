@@ -1,5 +1,6 @@
-# SEGi Timetable System - Database Integration
-
+# SEGi Timetable System 
+Automatic timetable generated PDF:
+!i[image alt]()
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/bb90da8b7aa7fd1ef7793e78d12741ba84d25b98/homepage.png)
 
 This project integrates the SEGi Timetable System with a MySQL database using PHP and phpMyAdmin.
