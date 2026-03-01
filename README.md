@@ -4,7 +4,7 @@ Automatic timetable generated PDF:
 Home Page:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/bb90da8b7aa7fd1ef7793e78d12741ba84d25b98/homepage.png)
 Course Edit Function:
-![image alt]()
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/c627b6a285974b429c906e2fac78480f6f4a21d4/edit.png)
 Teachers Details: 
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/4acaca6ac1ad5cb4eb9be5ebeee2d5c603ac12a2/teachers.png)
 
