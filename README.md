@@ -1,7 +1,24 @@
 # SEGi Timetable System 
 Automatic timetable generated PDF:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/40c635098df9a25d43c30987a3c97fda0b8b462a/pdf.png)
+Home Page:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/bb90da8b7aa7fd1ef7793e78d12741ba84d25b98/homepage.png)
+Course Edit Function:
+![image alt]()
+Teachers Details: 
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/4acaca6ac1ad5cb4eb9be5ebeee2d5c603ac12a2/teachers.png)
+
+Add Teachers:
+![image alt]()
+
+PDF Header:
+![image alt]()
+
+Generated table summary:
+![image alt]()
+
+Website Footer:
+![image alt]()
 
 This project integrates the SEGi Timetable System with a MySQL database using PHP and phpMyAdmin.
 
