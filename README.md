@@ -15,7 +15,7 @@ PDF Header:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/e7a6f31e237731cf4aff6bbdfff70fd3754414b8/pdfHeader.png)
 
 Generated table summary:
-![image alt]()
+![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/c865d320a3a1c6049868d6e6ecb6e4bacdace3d8/table.png)
 
 Website Footer:
 ![image alt](https://github.com/Rafia-Binte-Rezaul/Timetable-generating-system/blob/5701fea055fe0dbd13b0d6da1b05764f0a745980/homepage2.png)
